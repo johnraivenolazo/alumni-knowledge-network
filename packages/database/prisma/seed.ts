@@ -24,9 +24,19 @@ async function main() {
   const alumniData = [
     { name: 'John Doe', email: 'john@alumni.com', industry: 'Software Engineering', batch: '2015' },
     { name: 'Jane Smith', email: 'jane@alumni.com', industry: 'Data Science', batch: '2017' },
-    { name: 'Robert Fox', email: 'robert@alumni.com', industry: 'Product Management', batch: '2012' },
+    {
+      name: 'Robert Fox',
+      email: 'robert@alumni.com',
+      industry: 'Product Management',
+      batch: '2012',
+    },
     { name: 'Emily Chen', email: 'emily@alumni.com', industry: 'UX Design', batch: '2019' },
-    { name: 'Michael Brown', email: 'michael@alumni.com', industry: 'Cybersecurity', batch: '2016' },
+    {
+      name: 'Michael Brown',
+      email: 'michael@alumni.com',
+      industry: 'Cybersecurity',
+      batch: '2016',
+    },
   ];
 
   for (const a of alumniData) {
@@ -52,7 +62,7 @@ async function main() {
 
   // Create some sample posts
   const alumni = await prisma.user.findMany({ where: { email: { contains: '@alumni.com' } } });
-  
+
   for (const a of alumni) {
     await prisma.post.create({
       data: {

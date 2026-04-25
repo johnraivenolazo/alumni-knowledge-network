@@ -1,4 +1,15 @@
-import { Controller, Get, Patch, Body, Param, UseGuards, Req, Post, ForbiddenException, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+  Post,
+  ForbiddenException,
+  Query,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -35,7 +46,10 @@ export class UsersController {
   }
 
   @Get()
-  findAll(@Query('industry') industry?: string, @Query('batch') batch?: string) {
+  findAll(
+    @Query('industry') industry?: string,
+    @Query('batch') batch?: string,
+  ) {
     return this.usersService.findAll({ industry, batch });
   }
 

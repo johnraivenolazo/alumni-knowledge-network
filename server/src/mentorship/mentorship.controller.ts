@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Patch, Param, Get, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Get,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { MentorshipService } from './mentorship.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RequestStatus } from '@prisma/client';
@@ -9,8 +18,15 @@ export class MentorshipController {
   constructor(private readonly mentorshipService: MentorshipService) {}
 
   @Post('request')
-  sendRequest(@Req() req: any, @Body() body: { alumniId: string; message: string }) {
-    return this.mentorshipService.sendRequest(req.user.id, body.alumniId, body.message);
+  sendRequest(
+    @Req() req: any,
+    @Body() body: { alumniId: string; message: string },
+  ) {
+    return this.mentorshipService.sendRequest(
+      req.user.id,
+      body.alumniId,
+      body.message,
+    );
   }
 
   @Patch(':id/respond')
@@ -19,7 +35,11 @@ export class MentorshipController {
     @Param('id') id: string,
     @Body() body: { status: RequestStatus },
   ) {
-    return this.mentorshipService.respondToRequest(id, body.status, req.user.id);
+    return this.mentorshipService.respondToRequest(
+      id,
+      body.status,
+      req.user.id,
+    );
   }
 
   @Get('my-requests')

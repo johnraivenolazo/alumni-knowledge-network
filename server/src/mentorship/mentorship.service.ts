@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { RequestStatus } from '@prisma/client';
@@ -18,7 +22,9 @@ export class MentorshipService {
   }
 
   async sendRequest(studentId: string, alumniId: string, message: string) {
-    const alumni = await this.prisma.user.findUnique({ where: { id: alumniId } });
+    const alumni = await this.prisma.user.findUnique({
+      where: { id: alumniId },
+    });
     if (!alumni) throw new NotFoundException('Alumni not found');
 
     const request = await this.prisma.mentorshipRequest.create({
@@ -40,14 +46,19 @@ export class MentorshipService {
     return request;
   }
 
-  async respondToRequest(requestId: string, status: RequestStatus, alumniId: string) {
+  async respondToRequest(
+    requestId: string,
+    status: RequestStatus,
+    alumniId: string,
+  ) {
     const request = await this.prisma.mentorshipRequest.findUnique({
       where: { id: requestId },
       include: { student: true },
     });
 
     if (!request) throw new NotFoundException('Request not found');
-    if (request.alumniId !== alumniId) throw new ForbiddenException('Unauthorized');
+    if (request.alumniId !== alumniId)
+      throw new ForbiddenException('Unauthorized');
 
     const updatedRequest = await this.prisma.mentorshipRequest.update({
       where: { id: requestId },
@@ -77,7 +88,11 @@ export class MentorshipService {
     });
   }
 
-  private async sendEmailNotification(to: string, subject: string, body: string) {
+  private async sendEmailNotification(
+    to: string,
+    subject: string,
+    body: string,
+  ) {
     const sender = process.env.AWS_SES_SENDER || 'no-reply@neu.edu.ph';
     const command = new SendEmailCommand({
       Destination: { ToAddresses: [to] },

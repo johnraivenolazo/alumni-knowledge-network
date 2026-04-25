@@ -68,8 +68,12 @@ export class UsersService {
   async findAll(filters?: { industry?: string; batch?: string }) {
     return this.prisma.user.findMany({
       where: {
-        industry: filters?.industry ? { contains: filters.industry, mode: 'insensitive' } : undefined,
-        batch: filters?.batch ? { contains: filters.batch, mode: 'insensitive' } : undefined,
+        industry: filters?.industry
+          ? { contains: filters.industry, mode: 'insensitive' }
+          : undefined,
+        batch: filters?.batch
+          ? { contains: filters.batch, mode: 'insensitive' }
+          : undefined,
       },
       orderBy: { createdAt: 'desc' },
     });

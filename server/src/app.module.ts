@@ -10,7 +10,13 @@ import { PostsModule } from './posts/posts.module';
 import { MentorshipModule } from './mentorship/mentorship.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, PostsModule, MentorshipModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    PrismaModule,
+    PostsModule,
+    MentorshipModule,
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService, UsersService],
 })

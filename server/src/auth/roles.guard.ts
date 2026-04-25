@@ -16,10 +16,10 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
-    
+
     // Superadmin override
     if (user?.role === Role.SUPERADMIN) return true;
-    
+
     return requiredRoles.some((role) => user?.role === role);
   }
 }
