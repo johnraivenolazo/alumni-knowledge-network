@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="client/static/logo.png" alt="Alumni Knowledge Network Logo" width="150" />
+  <img src="client/static/logo_white_bg.png" alt="Alumni Knowledge Network Logo" width="150" />
   <h1>Alumni Knowledge Network</h1>
   <p>Connecting students with verified alumni for mentorship, career advice, and professional growth based on the SECI knowledge-sharing model.</p>
 </div>
