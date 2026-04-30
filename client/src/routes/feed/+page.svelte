@@ -4,7 +4,9 @@
 	import { api } from '$lib/api';
 	import { isAuthenticated } from '$lib/authService';
 
-	let posts = $state([]);
+	import { type Post } from '$lib/types';
+
+	let posts = $state<Post[]>([]);
 	let loading = $state(true);
 	let newPost = $state({ title: '', content: '' });
 	let error = $state('');
@@ -12,7 +14,7 @@
 	async function loadPosts() {
 		try {
 			posts = await api.get('/posts');
-		} catch (e) {
+		} catch (e: unknown) {
 			console.error(e);
 		} finally {
 			loading = false;
@@ -26,8 +28,8 @@
 			const created = await api.post('/posts', newPost);
 			posts = [created, ...posts];
 			newPost = { title: '', content: '' };
-		} catch (e: any) {
-			error = e.message;
+		} catch (e: unknown) {
+			error = (e as Error).message;
 		}
 	}
 
@@ -95,18 +97,22 @@
 			</div>
 		{:else}
 			<div class="space-y-6">
-				{#each posts as post, i}
+				{#each posts as post, i (post.id)}
 					<div
 						in:fly={{ y: 20, duration: 300, delay: i * 50 }}
 						class="group rounded-2xl border border-neutral-800 bg-neutral-900/50 p-8 transition-all hover:border-neutral-700"
 					>
 						<div class="mb-4 flex items-start justify-between">
 							<div>
-								<h3 class="mb-1 text-2xl font-bold text-white transition-colors group-hover:text-indigo-400">
+								<h3
+									class="mb-1 text-2xl font-bold text-white transition-colors group-hover:text-indigo-400"
+								>
 									{post.title}
 								</h3>
 								<div class="flex items-center gap-2 text-sm text-neutral-500">
-									<span class="font-medium text-neutral-300">{post.author?.name || 'Anonymous'}</span>
+									<span class="font-medium text-neutral-300"
+										>{post.author?.name || 'Anonymous'}</span
+									>
 									<span>•</span>
 									<span>{post.author?.industry || 'General'}</span>
 									<span>•</span>

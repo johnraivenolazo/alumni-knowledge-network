@@ -4,8 +4,9 @@
 	import { page } from '$app/state';
 	import { api } from '$lib/api';
 	import { user } from '$lib/authService';
+	import { type User } from '$lib/types';
 
-	let profileUser = $state(null);
+	let profileUser = $state<User | null>(null);
 	let loading = $state(true);
 	let isEditing = $state(false);
 	let editData = $state({ bio: '', industry: '', batch: '' });
@@ -127,28 +128,28 @@
 					{:else}
 						<div in:fade={{ duration: 200 }}>
 							<div class="grid grid-cols-2 gap-8 py-4">
-							<div>
-								<h3 class="mb-1 text-xs font-semibold tracking-wider text-neutral-500 uppercase">
-									Industry
-								</h3>
-								<p class="text-lg text-neutral-200">{profileUser.industry || 'Not specified'}</p>
+								<div>
+									<h3 class="mb-1 text-xs font-semibold tracking-wider text-neutral-500 uppercase">
+										Industry
+									</h3>
+									<p class="text-lg text-neutral-200">{profileUser.industry || 'Not specified'}</p>
+								</div>
+								<div>
+									<h3 class="mb-1 text-xs font-semibold tracking-wider text-neutral-500 uppercase">
+										Batch
+									</h3>
+									<p class="text-lg text-neutral-200">{profileUser.batch || 'Not specified'}</p>
+								</div>
 							</div>
 							<div>
 								<h3 class="mb-1 text-xs font-semibold tracking-wider text-neutral-500 uppercase">
-									Batch
+									Bio
 								</h3>
-								<p class="text-lg text-neutral-200">{profileUser.batch || 'Not specified'}</p>
+								<p class="leading-relaxed text-neutral-400">
+									{profileUser.bio || "This user hasn't shared a bio yet."}
+								</p>
 							</div>
 						</div>
-						<div>
-							<h3 class="mb-1 text-xs font-semibold tracking-wider text-neutral-500 uppercase">
-								Bio
-							</h3>
-							<p class="leading-relaxed text-neutral-400">
-								{profileUser.bio || "This user hasn't shared a bio yet."}
-							</p>
-						</div>
-							</div>
 					{/if}
 				</div>
 			</div>
@@ -156,7 +157,12 @@
 	{:else}
 		<div class="py-20 text-center">
 			<h1 class="mb-4 text-2xl font-bold">User not found</h1>
-			<a href="/feed" class="text-indigo-500 hover:underline">Back to feed</a>
+			<button
+				onclick={() => (window.location.href = '/feed')}
+				class="cursor-pointer border-none bg-transparent text-indigo-500 hover:underline"
+			>
+				Back to feed
+			</button>
 		</div>
 	{/if}
 </div>

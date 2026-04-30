@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	const title = 'Alumni Knowledge Network';
 </script>
 
@@ -10,23 +11,13 @@
 	/>
 </svelte:head>
 
-<main class="min-h-screen bg-neutral-950 text-white selection:bg-indigo-500/30">
+<main class="relative min-h-screen overflow-hidden text-white selection:bg-indigo-500/30">
 	<!-- Hero Section -->
-	<div class="relative overflow-hidden pt-32 pb-20 sm:pt-48 sm:pb-32">
-		<!-- Gradient background -->
-		<div class="absolute inset-0 -z-10">
-			<div
-				class="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,#3b82f633,transparent)]"
-			></div>
-			<div
-				class="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,#8b5cf622,transparent)]"
-			></div>
-		</div>
-
+	<div class="relative pt-20 pb-20 sm:pt-32 sm:pb-32">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
 			<div class="mx-auto max-w-2xl text-center">
 				<div class="mb-8 flex justify-center">
-					<img src="/logo.png?v=4" alt="AKN Logo" class="h-20 w-auto invert opacity-80" />
+					<img src="/logo.png?v=4" alt="AKN Logo" class="h-20 w-auto opacity-80 invert" />
 				</div>
 				<h1
 					class="bg-gradient-to-b from-white to-neutral-400 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-7xl"
@@ -39,7 +30,7 @@
 				</p>
 				<div class="mt-10 flex items-center justify-center gap-x-6">
 					<a
-						href="/login"
+						href="{base}/login"
 						class="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black shadow-sm transition-all hover:bg-neutral-200 active:scale-95"
 					>
 						Get Started
@@ -60,56 +51,77 @@
 		<dl class="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
 			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
 				<dt class="text-base leading-7 text-neutral-400">Verified Alumni</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl text-white">500+</dd>
+				<dd class="order-first text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+					500+
+				</dd>
 			</div>
 			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
 				<dt class="text-base leading-7 text-neutral-400">Mentorship Pairs</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl text-white">1.2k</dd>
+				<dd class="order-first text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+					1.2k
+				</dd>
 			</div>
 			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
 				<dt class="text-base leading-7 text-neutral-400">Success Rate</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl text-white">98%</dd>
+				<dd class="order-first text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+					98%
+				</dd>
 			</div>
 		</dl>
 	</div>
 
 	<!-- About / SECI Model Section -->
-	<div id="about" class="mx-auto max-w-7xl px-6 pb-32 lg:px-8 scroll-mt-24">
+	<div id="about" class="mx-auto max-w-7xl scroll-mt-24 px-6 pb-32 lg:px-8">
 		<div class="mx-auto max-w-2xl text-center">
 			<h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">The SECI Model</h2>
 			<p class="mt-6 text-lg leading-8 text-neutral-400">
-				Our platform is built on the SECI model of knowledge dimensions: Socialization, Externalization, Combination, and Internalization. 
+				Our platform is built on the SECI model of knowledge dimensions: Socialization,
+				Externalization, Combination, and Internalization.
 			</p>
 		</div>
-		<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-sm leading-6 text-neutral-300 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4">
-			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
-				<div class="font-bold text-white mb-3 text-base">Socialization</div>
+		<div
+			class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-sm leading-6 text-neutral-300 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4"
+		>
+			<div
+				class="group rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-all duration-300 hover:border-indigo-500/50 hover:bg-neutral-900/50"
+			>
+				<div
+					class="mb-3 text-base font-bold text-white transition-colors group-hover:text-indigo-400"
+				>
+					Socialization
+				</div>
 				Sharing tacit knowledge through face-to-face mentorship and shared experiences.
 			</div>
-			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
-				<div class="font-bold text-white mb-3 text-base">Externalization</div>
+			<div
+				class="group rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-all duration-300 hover:border-indigo-500/50 hover:bg-neutral-900/50"
+			>
+				<div
+					class="mb-3 text-base font-bold text-white transition-colors group-hover:text-indigo-400"
+				>
+					Externalization
+				</div>
 				Converting tacit knowledge into explicit concepts through dialogue and reflection.
 			</div>
-			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
-				<div class="font-bold text-white mb-3 text-base">Combination</div>
+			<div
+				class="group rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-all duration-300 hover:border-indigo-500/50 hover:bg-neutral-900/50"
+			>
+				<div
+					class="mb-3 text-base font-bold text-white transition-colors group-hover:text-indigo-400"
+				>
+					Combination
+				</div>
 				Organizing and integrating different bodies of explicit knowledge via our feed.
 			</div>
-			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
-				<div class="font-bold text-white mb-3 text-base">Internalization</div>
+			<div
+				class="group rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-all duration-300 hover:border-indigo-500/50 hover:bg-neutral-900/50"
+			>
+				<div
+					class="mb-3 text-base font-bold text-white transition-colors group-hover:text-indigo-400"
+				>
+					Internalization
+				</div>
 				Learning by doing and embodying explicit knowledge into personal mental models.
 			</div>
 		</div>
 	</div>
 </main>
-
-<style>
-	:global(body) {
-		background-color: #0a0a0a;
-		margin: 0;
-		font-family:
-			'Inter',
-			system-ui,
-			-apple-system,
-			sans-serif;
-	}
-</style>

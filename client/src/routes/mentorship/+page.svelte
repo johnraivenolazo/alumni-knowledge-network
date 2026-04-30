@@ -3,13 +3,13 @@
 	import { fly, fade } from 'svelte/transition';
 	import { api } from '$lib/api';
 	import { user, isAuthenticated } from '$lib/authService';
+	import { type User, type MentorshipRequest } from '$lib/types';
 
-	let requests = $state([]);
-	let alumniList = $state([]);
-	let loading = $state(true);
+	let requests = $state<MentorshipRequest[]>([]);
+	let alumniList = $state<User[]>([]);
 	let search = $state({ industry: '', batch: '' });
 	let requestMessage = $state('');
-	let selectedAlumni = $state(null);
+	let selectedAlumni = $state<User | null>(null);
 
 	async function loadData() {
 		try {
@@ -21,8 +21,6 @@
 			alumniList = alums;
 		} catch (e) {
 			console.error(e);
-		} finally {
-			loading = false;
 		}
 	}
 
@@ -66,8 +64,8 @@
 						<p class="text-neutral-500 italic">No active requests.</p>
 					{:else}
 						<div class="space-y-4">
-							{#each requests as req, i}
-								<div 
+							{#each requests as req, i (req.id)}
+								<div
 									in:fly={{ y: 20, duration: 300, delay: i * 50 }}
 									class="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6"
 								>
@@ -131,7 +129,7 @@
 					<div
 						class="scrollbar-thin scrollbar-thumb-neutral-800 grid max-h-[500px] grid-cols-1 gap-4 overflow-y-auto pr-2"
 					>
-						{#each alumniList.filter((a) => a.id !== $user?.id) as alum, i}
+						{#each alumniList.filter((a) => a.id !== $user?.id) as alum, i (alum.id)}
 							<div
 								in:fly={{ y: 20, duration: 300, delay: i * 50 }}
 								class="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/30 p-4 transition-colors hover:border-neutral-700"

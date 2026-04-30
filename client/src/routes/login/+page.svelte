@@ -7,13 +7,15 @@
 </svelte:head>
 
 <div class="flex min-h-[80vh] items-center justify-center px-4">
-	<div class="w-full max-w-md space-y-8 rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 backdrop-blur-xl sm:p-12">
+	<div
+		class="w-full max-w-md space-y-8 rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 backdrop-blur-xl sm:p-12"
+	>
 		<div class="text-center">
 			<div class="mb-6 flex justify-center">
-				<img src="/logo.png?v=4" alt="AKN Logo" class="h-16 w-auto invert opacity-90" />
+				<img src="/logo.png?v=4" alt="AKN Logo" class="h-16 w-auto opacity-90 invert" />
 			</div>
 			<h2 class="text-3xl font-bold tracking-tight text-white">Welcome Back</h2>
-			<p class="mt-3 text-neutral-400 text-sm">
+			<p class="mt-3 text-sm text-neutral-400">
 				Sign in to access the Alumni Knowledge Network and start connecting.
 			</p>
 		</div>
@@ -47,10 +49,10 @@
 			</button>
 		</div>
 
-		<div class="mt-8 text-center text-[10px] text-neutral-500 uppercase tracking-widest">
-			By signing in, you agree to our 
-			<span class="cursor-pointer text-neutral-400 hover:underline">Terms</span> 
-			& 
+		<div class="mt-8 text-center text-[10px] tracking-widest text-neutral-500 uppercase">
+			By signing in, you agree to our
+			<span class="cursor-pointer text-neutral-400 hover:underline">Terms</span>
+			&
 			<span class="cursor-pointer text-neutral-400 hover:underline">Privacy</span>
 		</div>
 	</div>

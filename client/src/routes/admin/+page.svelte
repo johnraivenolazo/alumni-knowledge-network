@@ -3,16 +3,17 @@
 	import { fly } from 'svelte/transition';
 	import { api } from '$lib/api';
 	import { user } from '$lib/authService';
+	import { type User } from '$lib/types';
 
-	let users = $state([]);
+	let users = $state<User[]>([]);
 	let loading = $state(true);
 	let error = $state('');
 
 	async function loadUsers() {
 		try {
 			users = await api.get('/users');
-		} catch (e: any) {
-			error = e.message;
+		} catch (e: unknown) {
+			error = (e as Error).message;
 		} finally {
 			loading = false;
 		}
@@ -22,8 +23,8 @@
 		try {
 			await api.patch(`/users/${userId}/role`, { role });
 			await loadUsers();
-		} catch (e: any) {
-			alert(e.message);
+		} catch (e: unknown) {
+			alert((e as Error).message);
 		}
 	}
 
@@ -69,8 +70,8 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each users as u, i}
-						<tr 
+					{#each users as u, i (u.id)}
+						<tr
 							in:fly={{ y: 10, duration: 200, delay: i * 30 }}
 							class="border-b border-neutral-800/50 transition-colors hover:bg-neutral-800/20"
 						>

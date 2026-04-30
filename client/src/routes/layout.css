@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 :root {
-  --color-neutral-950: #050505;
+	--color-neutral-950: #050505;
 }
 
 html {
@@ -11,9 +11,15 @@ html {
 body {
 	background-color: #0a0a0a;
 	color: #e5e5e5;
-	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	font-family:
+		'Inter',
+		system-ui,
+		-apple-system,
+		sans-serif;
 }
 
-h2, h3, h4 {
+h2,
+h3,
+h4 {
 	color: #ffffff;
 }
