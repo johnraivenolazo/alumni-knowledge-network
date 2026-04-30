@@ -95,5 +95,9 @@ The development and design of this project were made possible by:
 - **Boris**
 - **Ang**
 
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
 ---
 *Built for the alumni community.*
