@@ -1,0 +1,36 @@
+# AWS Amplify Hosting build spec
+# https://docs.aws.amazon.com/amplify/latest/userguide/build-settings.html
+#
+# This file is auto-detected by Amplify Console when you connect the repository.
+# It builds the SvelteKit client (a static SPA) from a pnpm monorepo and uploads
+# the contents of `client/build/` to Amplify's CDN. Environment variables that
+# start with `VITE_` are injected at build time and embedded into the bundle.
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # Amplify ships Node 20+ with corepack. Activate pnpm so the workspace
+        # lockfile resolves identically to local development.
+        - corepack enable
+        - corepack prepare pnpm@latest --activate
+        - pnpm install --frozen-lockfile
+    build:
+      commands:
+        # Build only the client; the NestJS server is deployed separately.
+        - pnpm --filter client build
+  artifacts:
+    # The SvelteKit adapter-static output. Anything under here is served by
+    # Amplify's CDN at the app's root URL.
+    baseDirectory: client/build
+    files:
+      - '**/*'
+  cache:
+    # Caching pnpm's content-addressable store + workspace node_modules makes
+    # subsequent builds dramatically faster.
+    paths:
+      - node_modules/**/*
+      - client/node_modules/**/*
+      - server/node_modules/**/*
+      - packages/**/node_modules/**/*
+      - ~/.local/share/pnpm/store/**/*

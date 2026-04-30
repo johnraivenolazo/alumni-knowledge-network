@@ -1,0 +1,25 @@
+# AWS Amplify Hosting custom HTTP headers
+# https://docs.aws.amazon.com/amplify/latest/userguide/custom-headers.html
+#
+# Headers below apply to every response served by the Amplify CDN. Amplify auto-
+# loads this file from the repo root on each deploy.
+customHeaders:
+  - pattern: '**'
+    headers:
+      - key: 'Strict-Transport-Security'
+        value: 'max-age=31536000; includeSubDomains'
+      - key: 'X-Content-Type-Options'
+        value: 'nosniff'
+      - key: 'X-Frame-Options'
+        value: 'SAMEORIGIN'
+      - key: 'Referrer-Policy'
+        value: 'strict-origin-when-cross-origin'
+      - key: 'Permissions-Policy'
+        value: 'geolocation=(), microphone=(), camera=()'
+
+  # Long-cache hashed asset bundles produced by Vite. These filenames are
+  # content-hashed so cache busting is automatic.
+  - pattern: '/_app/immutable/**'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
