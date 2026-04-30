@@ -6,11 +6,11 @@
 	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 		<div class="flex h-16 items-center justify-between">
 			<div class="flex items-center">
-				<a
-					href="/"
-					class="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-xl font-bold text-transparent"
-				>
-					AKN
+				<a href="/" class="flex items-center gap-3 transition-transform hover:scale-[1.02] active:scale-95 group">
+					<img src="/logo.png?v=4" alt="AKN Logo" class="h-9 w-auto invert opacity-90 transition-opacity group-hover:opacity-100" />
+					<span class="text-xl font-black tracking-[0.2em] bg-gradient-to-r from-white via-white to-neutral-500 bg-clip-text text-transparent uppercase">
+						AKN
+					</span>
 				</a>
 				<div class="hidden sm:ml-10 sm:flex sm:space-x-8">
 					<a

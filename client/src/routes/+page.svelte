@@ -25,6 +25,9 @@
 
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
 			<div class="mx-auto max-w-2xl text-center">
+				<div class="mb-8 flex justify-center">
+					<img src="/logo.png?v=4" alt="AKN Logo" class="h-20 w-auto invert opacity-80" />
+				</div>
 				<h1
 					class="bg-gradient-to-b from-white to-neutral-400 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-7xl"
 				>
@@ -57,17 +60,47 @@
 		<dl class="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
 			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
 				<dt class="text-base leading-7 text-neutral-400">Verified Alumni</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl">500+</dd>
+				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl text-white">500+</dd>
 			</div>
 			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
 				<dt class="text-base leading-7 text-neutral-400">Mentorship Pairs</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl">1.2k</dd>
+				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl text-white">1.2k</dd>
 			</div>
 			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
 				<dt class="text-base leading-7 text-neutral-400">Success Rate</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl">98%</dd>
+				<dd class="order-first text-3xl font-semibold tracking-tight sm:text-5xl text-white">98%</dd>
 			</div>
 		</dl>
+	</div>
+
+	<!-- About / SECI Model Section -->
+	<div id="about" class="mx-auto max-w-7xl px-6 pb-32 lg:px-8 scroll-mt-24">
+		<div class="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 md:p-16">
+			<div class="mx-auto max-w-2xl text-center">
+				<h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">The SECI Model</h2>
+				<p class="mt-6 text-lg leading-8 text-neutral-400">
+					Our platform is built on the SECI model of knowledge dimensions: Socialization, Externalization, Combination, and Internalization. 
+				</p>
+			</div>
+			<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-sm leading-6 text-neutral-300 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4">
+				<div class="rounded-2xl border border-neutral-800 p-6">
+					<div class="font-bold text-white mb-2">Socialization</div>
+					Sharing tacit knowledge through face-to-face mentorship and shared experiences.
+				</div>
+				<div class="rounded-2xl border border-neutral-800 p-6">
+					<div class="font-bold text-white mb-2">Externalization</div>
+					Converting tacit knowledge into explicit concepts through dialogue and reflection.
+				</div>
+				<div class="rounded-2xl border border-neutral-800 p-6">
+					<div class="font-bold text-white mb-2">Combination</div>
+					Organizing and integrating different bodies of explicit knowledge via our feed.
+				</div>
+				<div class="rounded-2xl border border-neutral-800 p-6">
+					<div class="font-bold text-white mb-2">Internalization</div>
+					Learning by doing and embodying explicit knowledge into personal mental models.
+				</div>
+			</div>
+		</div>
 	</div>
 </main>
 

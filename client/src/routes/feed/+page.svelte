@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import { api } from '$lib/api';
 	import { isAuthenticated } from '$lib/authService';
 
@@ -35,7 +36,7 @@
 
 <div class="mx-auto max-w-4xl px-4 py-12">
 	<div class="mb-12 flex items-center justify-between">
-		<h1 class="text-3xl font-bold">Knowledge Feed</h1>
+		<h1 class="text-3xl font-bold text-white">Knowledge Feed</h1>
 		{#if $isAuthenticated}
 			<button
 				class="rounded-lg bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700"
@@ -50,7 +51,7 @@
 			onsubmit={handleSubmit}
 			class="mb-12 space-y-4 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6"
 		>
-			<h2 class="mb-2 text-xl font-semibold">Share your knowledge</h2>
+			<h2 class="mb-2 text-xl font-semibold text-white">Share your knowledge</h2>
 			<input
 				bind:value={newPost.title}
 				placeholder="Title"
@@ -88,13 +89,14 @@
 		</div>
 	{:else}
 		<div class="space-y-6">
-			{#each posts as post}
+			{#each posts as post, i}
 				<div
+					in:fly={{ y: 20, duration: 300, delay: i * 50 }}
 					class="group rounded-2xl border border-neutral-800 bg-neutral-900/50 p-8 transition-all hover:border-neutral-700"
 				>
 					<div class="mb-4 flex items-start justify-between">
 						<div>
-							<h3 class="mb-1 text-2xl font-bold transition-colors group-hover:text-indigo-400">
+							<h3 class="mb-1 text-2xl font-bold text-white transition-colors group-hover:text-indigo-400">
 								{post.title}
 							</h3>
 							<div class="flex items-center gap-2 text-sm text-neutral-500">

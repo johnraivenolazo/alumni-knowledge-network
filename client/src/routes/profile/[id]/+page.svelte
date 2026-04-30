@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { api } from '$lib/api';
 	import { user } from '$lib/authService';
@@ -74,7 +75,7 @@
 					</div>
 
 					{#if isEditing}
-						<div class="space-y-4 pt-4">
+						<div in:fade={{ duration: 200 }} class="space-y-4 pt-4">
 							<div class="grid grid-cols-2 gap-4">
 								<div>
 									<label class="mb-1 block text-xs font-semibold text-neutral-500 uppercase"
@@ -124,7 +125,8 @@
 							</div>
 						</div>
 					{:else}
-						<div class="grid grid-cols-2 gap-8 py-4">
+						<div in:fade={{ duration: 200 }}>
+							<div class="grid grid-cols-2 gap-8 py-4">
 							<div>
 								<h3 class="mb-1 text-xs font-semibold tracking-wider text-neutral-500 uppercase">
 									Industry
@@ -146,6 +148,7 @@
 								{profileUser.bio || "This user hasn't shared a bio yet."}
 							</p>
 						</div>
+							</div>
 					{/if}
 				</div>
 			</div>
