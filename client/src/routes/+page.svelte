@@ -75,30 +75,28 @@
 
 	<!-- About / SECI Model Section -->
 	<div id="about" class="mx-auto max-w-7xl px-6 pb-32 lg:px-8 scroll-mt-24">
-		<div class="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 md:p-16">
-			<div class="mx-auto max-w-2xl text-center">
-				<h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">The SECI Model</h2>
-				<p class="mt-6 text-lg leading-8 text-neutral-400">
-					Our platform is built on the SECI model of knowledge dimensions: Socialization, Externalization, Combination, and Internalization. 
-				</p>
+		<div class="mx-auto max-w-2xl text-center">
+			<h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">The SECI Model</h2>
+			<p class="mt-6 text-lg leading-8 text-neutral-400">
+				Our platform is built on the SECI model of knowledge dimensions: Socialization, Externalization, Combination, and Internalization. 
+			</p>
+		</div>
+		<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-sm leading-6 text-neutral-300 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4">
+			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
+				<div class="font-bold text-white mb-3 text-base">Socialization</div>
+				Sharing tacit knowledge through face-to-face mentorship and shared experiences.
 			</div>
-			<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-sm leading-6 text-neutral-300 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4">
-				<div class="rounded-2xl border border-neutral-800 p-6">
-					<div class="font-bold text-white mb-2">Socialization</div>
-					Sharing tacit knowledge through face-to-face mentorship and shared experiences.
-				</div>
-				<div class="rounded-2xl border border-neutral-800 p-6">
-					<div class="font-bold text-white mb-2">Externalization</div>
-					Converting tacit knowledge into explicit concepts through dialogue and reflection.
-				</div>
-				<div class="rounded-2xl border border-neutral-800 p-6">
-					<div class="font-bold text-white mb-2">Combination</div>
-					Organizing and integrating different bodies of explicit knowledge via our feed.
-				</div>
-				<div class="rounded-2xl border border-neutral-800 p-6">
-					<div class="font-bold text-white mb-2">Internalization</div>
-					Learning by doing and embodying explicit knowledge into personal mental models.
-				</div>
+			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
+				<div class="font-bold text-white mb-3 text-base">Externalization</div>
+				Converting tacit knowledge into explicit concepts through dialogue and reflection.
+			</div>
+			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
+				<div class="font-bold text-white mb-3 text-base">Combination</div>
+				Organizing and integrating different bodies of explicit knowledge via our feed.
+			</div>
+			<div class="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 transition-colors hover:border-neutral-700">
+				<div class="font-bold text-white mb-3 text-base">Internalization</div>
+				Learning by doing and embodying explicit knowledge into personal mental models.
 			</div>
 		</div>
 	</div>

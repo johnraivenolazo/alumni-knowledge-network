@@ -4,16 +4,16 @@
   --color-neutral-950: #050505;
 }
 
-:global(html) {
+html {
 	scroll-behavior: smooth;
 }
 
-:global(body) {
+body {
 	background-color: #0a0a0a;
 	color: #e5e5e5;
 	font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-:global(h1), :global(h2), :global(h3), :global(h4) {
+h2, h3, h4 {
 	color: #ffffff;
 }

@@ -8,6 +8,12 @@ export const loading = writable(true);
 let auth0: Auth0Client;
 
 export async function initAuth() {
+	if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
+		console.warn('Auth0 credentials missing. Authentication will be disabled.');
+		loading.set(false);
+		return;
+	}
+
 	auth0 = await createAuth0Client({
 		domain: import.meta.env.VITE_AUTH0_DOMAIN,
 		clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
