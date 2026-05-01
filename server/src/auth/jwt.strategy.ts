@@ -31,9 +31,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       const token = req.headers.authorization?.split(' ')[1];
       if (token) {
         try {
-          const response = await fetch(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const response = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/userinfo`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
           if (response.ok) {
             const userInfo = await response.json();
             email = userInfo.email;
@@ -47,7 +50,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     if (!email) {
       // Fallback if still no email (Prisma requires it)
-      console.warn('No email found in token or userinfo. Using sub as fallback.');
+      console.warn(
+        'No email found in token or userinfo. Using sub as fallback.',
+      );
       email = `${payload.sub}@fallback.akn`;
       name = name || 'Anonymous User';
     }

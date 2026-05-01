@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@akn/database';
 
@@ -37,9 +41,20 @@ export class PostsService {
     return post;
   }
 
-  async remove(id: string, authorId: string) {
+  async remove(id: string, userId: string, userRole: Role) {
     const post = await this.findOne(id);
-    if (post.authorId !== authorId) throw new Error('Unauthorized');
+
+    // Hierarchy: Author, Admin, and Superadmin can delete
+    const isAuthor = post.authorId === userId;
+    const isPrivileged =
+      userRole === Role.ADMIN || userRole === Role.SUPERADMIN;
+
+    if (!isAuthor && !isPrivileged) {
+      throw new ForbiddenException(
+        'You do not have permission to delete this post',
+      );
+    }
+
     return this.prisma.post.delete({ where: { id } });
   }
 }

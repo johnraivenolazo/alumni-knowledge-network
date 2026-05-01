@@ -6,7 +6,10 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class UsersService {
-  private readonly SUPERADMIN_EMAILS = ['jcesperanza@neu.edu.ph', 'johnraivenolazo@gmail.com'];
+  private readonly SUPERADMIN_EMAILS = [
+    'jcesperanza@neu.edu.ph',
+    'johnraivenolazo@gmail.com',
+  ];
   private s3Client: S3Client;
 
   constructor(private prisma: PrismaService) {

@@ -32,13 +32,13 @@ Why the split? Amplify Hosting is purpose-built for static and pre-rendered fron
 
 The repo ships with everything Amplify needs. You should not have to edit any of these files for a normal deploy:
 
-| File | Purpose |
-| --- | --- |
-| `amplify.yml` | Build spec: enables pnpm, installs the workspace, runs `pnpm --filter client build`, uploads `client/build/`. |
-| `customHttp.yml` | Security headers (HSTS, X-Frame-Options, etc.) and long-cache rules for hashed JS/CSS bundles. |
-| `client/svelte.config.js` | Uses `@sveltejs/adapter-static` with `fallback: 'index.html'` to produce a SPA bundle. |
-| `client/src/routes/+layout.ts` | Disables SSR and prerendering so Auth0's SPA SDK works at runtime. |
-| `client/.env.example` | Lists every variable Amplify needs. |
+| File                           | Purpose                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `amplify.yml`                  | Build spec: enables pnpm, installs the workspace, runs `pnpm --filter client build`, uploads `client/build/`. |
+| `customHttp.yml`               | Security headers (HSTS, X-Frame-Options, etc.) and long-cache rules for hashed JS/CSS bundles.                |
+| `client/svelte.config.js`      | Uses `@sveltejs/adapter-static` with `fallback: 'index.html'` to produce a SPA bundle.                        |
+| `client/src/routes/+layout.ts` | Disables SSR and prerendering so Auth0's SPA SDK works at runtime.                                            |
+| `client/.env.example`          | Lists every variable Amplify needs.                                                                           |
 
 ---
 
@@ -80,16 +80,16 @@ The repo holds three packages (`client`, `server`, `packages/database`) but Ampl
 In the Console:
 
 1. Open your app → **App settings** → **Environment variables** → **Manage variables**.
-2. Add each row below. **Branch** can be left as *All branches* unless you want per-branch overrides.
+2. Add each row below. **Branch** can be left as _All branches_ unless you want per-branch overrides.
 
-| Key | Example value | Notes |
-| --- | --- | --- |
-| `VITE_API_URL` | `https://api.your-domain.com/api` | Public URL of the NestJS backend, **including** the `/api` prefix. No trailing slash. |
-| `VITE_AUTH0_DOMAIN` | `your-tenant.us.auth0.com` | From the Auth0 SPA application. |
-| `VITE_AUTH0_CLIENT_ID` | `abc123...` | From the Auth0 SPA application. |
-| `VITE_AUTH0_AUDIENCE` | `https://api.akn.example` | The API identifier configured in Auth0 → APIs. |
+| Key                    | Example value                     | Notes                                                                                 |
+| ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
+| `VITE_API_URL`         | `https://api.your-domain.com/api` | Public URL of the NestJS backend, **including** the `/api` prefix. No trailing slash. |
+| `VITE_AUTH0_DOMAIN`    | `your-tenant.us.auth0.com`        | From the Auth0 SPA application.                                                       |
+| `VITE_AUTH0_CLIENT_ID` | `abc123...`                       | From the Auth0 SPA application.                                                       |
+| `VITE_AUTH0_AUDIENCE`  | `https://api.akn.example`         | The API identifier configured in Auth0 → APIs.                                        |
 
-> **Why `VITE_` prefixes?** Vite only inlines variables whose name starts with `VITE_` into the browser bundle. Anything else stays server-side and is invisible to the client. This is intentional — never put secrets here. The Auth0 *Client ID* is public by design (SPA flow); the *Client Secret* must never appear on the client.
+> **Why `VITE_` prefixes?** Vite only inlines variables whose name starts with `VITE_` into the browser bundle. Anything else stays server-side and is invisible to the client. This is intentional — never put secrets here. The Auth0 _Client ID_ is public by design (SPA flow); the _Client Secret_ must never appear on the client.
 
 3. Click **Save**.
 4. Trigger a redeploy from **Hosting environments** → your branch → **Redeploy this version**. Environment variables are baked in at build time; without a rebuild they don't take effect.
@@ -107,9 +107,9 @@ Without this rule, deep links like `https://your-app.com/profile/me` return a 40
 1. Open your app → **App settings** → **Rewrites and redirects** → **Edit**.
 2. Click **Add rewrite/redirect** and fill in:
 
-| Source address | Target address | Type |
-| --- | --- | --- |
-| `</^[^.]+$\|\.(?!(css\|gif\|ico\|jpg\|jpeg\|js\|png\|txt\|svg\|woff\|woff2\|ttf\|map\|json\|webp\|xml\|mp4\|webm)$)([^.]+$)/>` | `/index.html` | `200 (Rewrite)` |
+| Source address                                                                                                                 | Target address | Type            |
+| ------------------------------------------------------------------------------------------------------------------------------ | -------------- | --------------- |
+| `</^[^.]+$\|\.(?!(css\|gif\|ico\|jpg\|jpeg\|js\|png\|txt\|svg\|woff\|woff2\|ttf\|map\|json\|webp\|xml\|mp4\|webm)$)([^.]+$)/>` | `/index.html`  | `200 (Rewrite)` |
 
 3. Click **Save**.
 
@@ -171,11 +171,11 @@ Without this, login redirects fail with `Callback URL mismatch`.
 
 Amplify Hosting will not run NestJS. Pick one of:
 
-| Service | When to use it | Pointers |
-| --- | --- | --- |
-| **AWS App Runner** | Easiest. Push a container to ECR (or point at the repo), App Runner handles scale-to-zero, TLS, and a public URL. | Build a Dockerfile around `server/`, expose port `3000`, set the env vars listed in `server/.env.example`. |
-| **Elastic Beanstalk (Node.js platform)** | Good if you don't want containers. EB runs `pnpm install && pnpm run build && node dist/main`. | Use the Node.js 20+ platform; configure env vars in the EB console. |
-| **ECS Fargate behind ALB** | Best for production with VPC peering to RDS, autoscaling, etc. | Standard container deployment; mind security groups for the RDS instance. |
+| Service                                  | When to use it                                                                                                    | Pointers                                                                                                   |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **AWS App Runner**                       | Easiest. Push a container to ECR (or point at the repo), App Runner handles scale-to-zero, TLS, and a public URL. | Build a Dockerfile around `server/`, expose port `3000`, set the env vars listed in `server/.env.example`. |
+| **Elastic Beanstalk (Node.js platform)** | Good if you don't want containers. EB runs `pnpm install && pnpm run build && node dist/main`.                    | Use the Node.js 20+ platform; configure env vars in the EB console.                                        |
+| **ECS Fargate behind ALB**               | Best for production with VPC peering to RDS, autoscaling, etc.                                                    | Standard container deployment; mind security groups for the RDS instance.                                  |
 
 Whichever you pick, the backend needs the variables in `server/.env.example`:
 
@@ -225,7 +225,7 @@ Step 4 (the SPA rewrite) was not applied. Re-check **App settings** → **Rewrit
 The build container's image doesn't have corepack on the `PATH`. Switch the Amplify build image to **Amazon Linux 2023** (Console → **App settings** → **Build settings** → **Build image settings** → `aws/codebuild/amazonlinux-x86_64-standard:5.0` or newer). Recent images ship Node 20 with corepack pre-enabled.
 
 **Browser console: `import.meta.env.VITE_*` is `undefined`.**
-The variable was added to Amplify *after* the last build. Trigger **Redeploy this version** to bake the new value into the bundle.
+The variable was added to Amplify _after_ the last build. Trigger **Redeploy this version** to bake the new value into the bundle.
 
 ---
 

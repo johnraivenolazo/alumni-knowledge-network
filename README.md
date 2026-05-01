@@ -38,21 +38,24 @@ Follow these steps to set up the project locally.
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/bgduque/alumni-knowledge-network.git
    cd alumni-knowledge-network
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Set up environment variables**
-   
+
    Create `.env` files in both the `client` and `server` directories. See `.env.example` in each folder for the required keys.
 
    **Client (`client/.env`)**
+
    ```env
    VITE_AUTH0_DOMAIN=your-auth0-domain
    VITE_AUTH0_CLIENT_ID=your-auth0-client-id
@@ -61,6 +64,7 @@ Follow these steps to set up the project locally.
    ```
 
    **Server (`server/.env`)**
+
    ```env
    DATABASE_URL=your-postgres-url
    AUTH0_DOMAIN=your-auth0-domain
@@ -68,6 +72,7 @@ Follow these steps to set up the project locally.
    ```
 
 4. **Initialize the database**
+
    ```bash
    cd packages/database
    pnpm prisma db push
@@ -75,11 +80,13 @@ Follow these steps to set up the project locally.
    ```
 
 5. **Start the development servers**
-   
+
    From the root of the project, run:
+
    ```bash
    pnpm dev
    ```
+
    This command starts both the SvelteKit frontend (port 5173) and the NestJS backend (port 3000) concurrently.
 
 ## Deployment
@@ -100,5 +107,5 @@ The development and design of this project were made possible by:
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
-*Built for the alumni community.*
 
+_Built for the alumni community._

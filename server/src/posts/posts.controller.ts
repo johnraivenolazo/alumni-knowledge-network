@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthenticatedRequest } from '../auth/request.interface';
 
 @Controller('posts')
 export class PostsController {
@@ -27,13 +28,16 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Req() req: any, @Body() body: { title: string; content: string }) {
+  create(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: { title: string; content: string },
+  ) {
     return this.postsService.create(req.user.id, body.title, body.content);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Req() req: any, @Param('id') id: string) {
+  remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     return this.postsService.remove(id, req.user.id, req.user.role);
   }
 }

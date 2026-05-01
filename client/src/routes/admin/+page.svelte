@@ -29,7 +29,11 @@
 	}
 
 	async function removeUser(userId: string) {
-		if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.'))
+		if (
+			!confirm(
+				'Are you sure you want to permanently delete this user? This action cannot be undone.'
+			)
+		)
 			return;
 		try {
 			await api.delete(`/users/${userId}`);
@@ -127,7 +131,7 @@
 												stroke-width="2"
 												stroke-linecap="round"
 												stroke-linejoin="round"
-											><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
+												><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
 													d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
 												/></svg
 											>
