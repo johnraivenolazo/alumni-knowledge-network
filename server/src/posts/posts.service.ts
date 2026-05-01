@@ -26,7 +26,13 @@ export class PostsService {
       orderBy: { createdAt: 'desc' },
       include: {
         author: {
-          select: { id: true, name: true, profilePic: true, industry: true, role: true },
+          select: {
+            id: true,
+            name: true,
+            profilePic: true,
+            industry: true,
+            role: true,
+          },
         },
       },
     });

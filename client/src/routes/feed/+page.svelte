@@ -127,8 +127,8 @@
 										<span
 											class="rounded-full px-2 py-0.5 text-[9px] font-bold tracking-tighter uppercase
                       {post.author.role === 'SUPERADMIN'
-												? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-												: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}"
+												? 'border border-purple-500/20 bg-purple-500/10 text-purple-400'
+												: 'border border-indigo-500/20 bg-indigo-500/10 text-indigo-400'}"
 										>
 											{post.author.role}
 										</span>
