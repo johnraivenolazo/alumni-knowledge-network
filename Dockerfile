@@ -19,7 +19,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma Client (Custom output is in packages/database/dist-client)
-RUN cd packages/database && DATABASE_URL="postgresql://dummy" npx prisma generate
+RUN cd packages/database && DATABASE_URL="postgresql://dummy" pnpm exec prisma generate
 
 # Build the NestJS server
 RUN pnpm --filter server build
