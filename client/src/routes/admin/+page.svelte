@@ -2,14 +2,16 @@
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { api } from '$lib/api';
-	import { user } from '$lib/authService';
-	import { type User } from '$lib/types';
+	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
+	import { goto } from '$app/navigation';
+	import { type User, type Role } from '$lib/types';
 
 	let users = $state<User[]>([]);
 	let loading = $state(true);
 	let error = $state('');
 
 	async function loadUsers() {
+		if (!$isAuthenticated) return;
 		try {
 			users = await api.get('/users');
 		} catch (e: unknown) {
@@ -19,7 +21,7 @@
 		}
 	}
 
-	async function changeRole(userId: string, role: string) {
+	async function handleRoleChange(userId: string, role: Role) {
 		try {
 			await api.patch(`/users/${userId}/role`, { role });
 			await loadUsers();
@@ -28,7 +30,7 @@
 		}
 	}
 
-	async function removeUser(userId: string) {
+	async function handleDelete(userId: string) {
 		if (
 			!confirm(
 				'Are you sure you want to permanently delete this user? This action cannot be undone.'
@@ -43,7 +45,26 @@
 		}
 	}
 
-	onMount(loadUsers);
+	onMount(() => {
+		if (!$authLoading && !$isAuthenticated) {
+			goto('/login');
+		} else if (!$authLoading && $isAuthenticated) {
+			loadUsers();
+		}
+	});
+
+	$effect(() => {
+		if (!$authLoading && !$isAuthenticated) {
+			goto('/login');
+		} else if (
+			!$authLoading &&
+			$isAuthenticated &&
+			$user?.role !== 'ADMIN' &&
+			$user?.role !== 'SUPERADMIN'
+		) {
+			goto('/feed');
+		}
+	});
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-12">
