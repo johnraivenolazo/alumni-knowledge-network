@@ -39,8 +39,15 @@ export async function initAuth() {
 	isAuthenticated.set(isAuth);
 
 	if (isAuth) {
-		const userData = await auth0.getUser();
-		user.set(userData ?? null);
+		try {
+			const { api } = await import('./api');
+			const dbUser = await api.get('/users/me');
+			user.set(dbUser);
+		} catch (e) {
+			console.error('Failed to sync user with backend:', e);
+			const userData = await auth0.getUser();
+			user.set(userData ?? null);
+		}
 	}
 
 	loading.set(false);

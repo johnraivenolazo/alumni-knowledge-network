@@ -118,7 +118,7 @@
 													? 'border border-indigo-500/20 bg-indigo-500/10 text-indigo-400'
 													: 'border border-neutral-700 bg-neutral-800 text-neutral-400'}"
 										>
-											{$user?.role === 'SUPERADMIN' ? 'SUPERADMIN' : ($user?.role || 'User')}
+											{$user?.role === 'SUPERADMIN' ? 'SUPERADMIN' : $user?.role || 'User'}
 										</span>
 									</div>
 									<p class="truncate text-sm font-bold text-white">{$user?.email}</p>
