@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { api } from '$lib/api';
-	import { isAuthenticated, user } from '$lib/authService';
+	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
+	import { goto } from '$app/navigation';
 
 	import { type Post } from '$lib/types';
 
@@ -12,6 +13,7 @@
 	let error = $state('');
 
 	async function loadPosts() {
+		if (!$isAuthenticated) return;
 		try {
 			posts = await api.get('/posts');
 		} catch (e: unknown) {
@@ -43,11 +45,17 @@
 		}
 	}
 
+	onMount(() => {
+		if (!$authLoading && !$isAuthenticated) {
+			goto('/login');
+		} else if (!$authLoading && $isAuthenticated) {
+			loadPosts();
+		}
+	});
+
 	if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
 		console.warn('Auth0 credentials missing. Authentication will be disabled.');
 		loading = false;
-	} else {
-		onMount(loadPosts);
 	}
 </script>
 
