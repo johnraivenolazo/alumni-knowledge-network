@@ -7,7 +7,8 @@
 # start with `VITE_` are injected at build time and embedded into the bundle.
 version: 1
 applications:
-  - frontend:
+  - appRoot: client
+    frontend:
       phases:
         preBuild:
           commands:
@@ -18,14 +19,12 @@ applications:
           commands:
             - pnpm --filter client build
       artifacts:
-        baseDirectory: client/build
+        baseDirectory: build
         files:
           - '**/*'
       cache:
         paths:
           - node_modules/**/*
-          - client/node_modules/**/*
-          - server/node_modules/**/*
-          - packages/**/node_modules/**/*
-          - ~/.local/share/pnpm/store/**/*
-      appRoot: client
+          - ../node_modules/**/*
+          - ../server/node_modules/**/*
+          - ../packages/**/node_modules/**/*
