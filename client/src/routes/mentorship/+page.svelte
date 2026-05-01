@@ -53,7 +53,8 @@
 	// Helper to check relationship status in directory
 	function getAlumniStatus(alumId: string) {
 		const req = requests.find(r => r.studentId === alumId || r.alumniId === alumId);
-		return req?.status || null;
+		if (!req || req.status === 'CANCELLED' || req.status === 'DECLINED') return null;
+		return req.status;
 	}
 
 	onMount(loadData);
@@ -99,12 +100,25 @@
 									<p class="text-xs text-neutral-500 uppercase tracking-widest">{partner.industry || 'General'}</p>
 								</div>
 							</div>
-							<button 
-								onclick={() => activeChatRequest = req}
-								class="w-full rounded-xl bg-white/5 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)]"
-							>
-								Open Chat
-							</button>
+							<div class="flex gap-2">
+								<button 
+									onclick={() => activeChatRequest = req}
+									class="flex-grow rounded-xl bg-white/5 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)]"
+								>
+									Open Chat
+								</button>
+								<button 
+									onclick={() => {
+										if(confirm('Are you sure you want to end this mentorship connection?')) {
+											handleResponse(req.id, 'CANCELLED');
+										}
+									}}
+									class="rounded-xl bg-neutral-800 p-3 text-neutral-500 hover:text-red-400 transition-all"
+									title="End Connection"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+								</button>
+							</div>
 						</div>
 					{/each}
 				</div>

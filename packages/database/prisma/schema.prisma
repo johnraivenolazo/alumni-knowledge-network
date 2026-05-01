@@ -16,6 +16,7 @@ enum RequestStatus {
   PENDING
   ACCEPTED
   DECLINED
+  CANCELLED
 }
 
 model User {

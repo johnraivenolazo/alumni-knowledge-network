@@ -22,7 +22,7 @@ export interface MentorshipRequest {
 	studentId: string;
 	alumniId: string;
 	message: string;
-	status: 'PENDING' | 'ACCEPTED' | 'DECLINED';
+	status: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED';
 	createdAt: string;
 	student: User;
 	alumni: User;
