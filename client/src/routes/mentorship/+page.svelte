@@ -245,6 +245,7 @@
 				requestId={activeChatRequest.id} 
 				receiverId={partner.id}
 				partnerName={partner.name}
+				initialMessages={activeChatRequest.messages || []}
 			/>
 		</div>
 	</div>

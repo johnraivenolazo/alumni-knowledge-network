@@ -5,10 +5,10 @@
 	import { user, getToken } from '$lib/authService';
 	import { type Message } from '$lib/types';
 
-	let { requestId, receiverId, partnerName } = $props();
+	let { requestId, receiverId, partnerName, initialMessages = [] } = $props();
 
 	let socket: Socket;
-	let messages = $state<Message[]>([]);
+	let messages = $state<Message[]>(initialMessages);
 	let newMessage = $state('');
 	let chatContainer = $state<HTMLElement | null>(null);
 	let isConnected = $state(false);
@@ -68,7 +68,7 @@
 
 	onMount(async () => {
 		await initSocket();
-		// Fetch existing messages here if needed
+		scrollToBottom();
 	});
 
 	onDestroy(() => {
