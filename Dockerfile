@@ -1,42 +1,50 @@
-# Build Stage
-FROM node:22-slim AS builder
-
-# Install pnpm
+# --- Base Stage ---
+FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
+RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-# Copy all files first to ensure workspace integrity
-COPY . .
+# --- Build Stage ---
+FROM base AS builder
+# Copy only files needed for install to leverage Docker cache
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages/database/package.json ./packages/database/
+COPY server/package.json ./server/package.json
 
-# Install dependencies
+# Install ALL dependencies (including devDeps for build)
 RUN pnpm install --frozen-lockfile
 
-# Generate Prisma Client (with dummy DB URL)
+# Copy the rest of the source code
+COPY . .
+
+# Generate Prisma Client (Custom output is in packages/database/dist-client)
 RUN cd packages/database && DATABASE_URL="postgresql://dummy" npx prisma generate
 
-# Build the server
+# Build the NestJS server
 RUN pnpm --filter server build
 
-# --- Production Stage ---
+# --- Deploy Stage (Isolate production dependencies) ---
+FROM base AS deployer
+# This command creates a standalone folder with only prod dependencies
+RUN pnpm deploy --filter=server --prod /app/out
+
+# Manually copy the built server dist and generated prisma client into the isolated folder
+# pnpm deploy usually doesn't include the 'dist' folder if it's ignored or not part of the package
+COPY --from=builder /app/server/dist /app/out/dist
+COPY --from=builder /app/packages/database/dist-client /app/out/node_modules/@akn/database/dist-client
+
+# --- Final Production Stage ---
 FROM node:22-slim AS runner
 WORKDIR /app
 
-# Install pnpm in runner to handle workspace deps correctly
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# Copy the isolated output from deployer
+COPY --from=deployer /app/out ./
 
-# Copy everything from builder (Safe way for monorepo)
-COPY --from=builder /app /app
-
-# Set environment to production
+# Set production environment
 ENV NODE_ENV=production
-
-# Expose port
+ENV PORT=3000
 EXPOSE 3000
 
-# Start the server using pnpm to handle workspace symlinks
-CMD ["pnpm", "--filter", "server", "start:prod"]
+# Start the server directly using node
+CMD ["node", "dist/main.js"]
