@@ -151,41 +151,45 @@
 									</span>
 								</td>
 								<td class="px-8 py-4">
-									{#if u.id !== $user?.id && $user?.role === 'SUPERADMIN'}
-										<div class="flex items-center gap-3">
+									<div class="flex items-center gap-3">
+										{#if u.id !== $user?.id && u.role !== 'SUPERADMIN'}
 											<select
-												onchange={(e) => changeRole(u.id, e.target.value)}
-												class="rounded-lg border border-neutral-800 bg-neutral-950 px-2 py-1 text-xs outline-none focus:border-indigo-500"
 												value={u.role}
+												onchange={(e) =>
+													handleRoleChange(u.id, (e.target as HTMLSelectElement).value as Role)}
+												class="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-300 transition-all hover:border-neutral-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
 											>
 												<option value="USER">Make User</option>
 												<option value="ADMIN">Make Admin</option>
 												<option value="SUPERADMIN">Make Superadmin</option>
 											</select>
+
 											<button
-												onclick={() => removeUser(u.id)}
-												class="rounded-lg p-2 text-neutral-600 transition-colors hover:bg-red-500/10 hover:text-red-500"
-												title="Delete user"
+												onclick={() => handleDelete(u.id)}
+												class="rounded-lg p-2 text-neutral-500 transition-all hover:bg-red-500/10 hover:text-red-400"
+												title="Delete User"
 											>
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
-													width="16"
-													height="16"
+													width="18"
+													height="18"
 													viewBox="0 0 24 24"
 													fill="none"
 													stroke="currentColor"
 													stroke-width="2"
 													stroke-linecap="round"
 													stroke-linejoin="round"
-													><path d="M3 6h18" /><path
-														d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
-													/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg
+													><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
+														d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
+													/></svg
 												>
 											</button>
-										</div>
-									{:else}
-										<span class="text-xs text-neutral-600">No actions</span>
-									{/if}
+										{:else}
+											<span class="text-[10px] italic text-neutral-500 opacity-50">
+												Protected Account
+											</span>
+										{/if}
+									</div>
 								</td>
 							</tr>
 						{/each}

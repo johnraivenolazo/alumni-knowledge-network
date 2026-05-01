@@ -81,12 +81,18 @@ export class UsersController {
       }
     }
 
-    if (
-      actorId === targetId &&
-      actorRole === Role.SUPERADMIN &&
-      body.role !== Role.SUPERADMIN
-    ) {
-      // Safety check
+    // Executive Protection: Prevent Superadmins from downgrading themselves or peers
+    if (targetUser.role === Role.SUPERADMIN) {
+      if (actorId === targetId) {
+        throw new ForbiddenException(
+          'You cannot change your own role to avoid accidental lockout',
+        );
+      }
+      if (body.role !== Role.SUPERADMIN) {
+        throw new ForbiddenException(
+          'Superadmin roles are protected and cannot be downgraded',
+        );
+      }
     }
 
     return this.usersService.changeRole(targetId, body.role);
