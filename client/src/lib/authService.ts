@@ -23,6 +23,13 @@ export async function initAuth() {
 		}
 	});
 
+	// Check if we are returning from Auth0 redirect
+	const query = window.location.search;
+	if (query.includes('code=') && query.includes('state=')) {
+		await auth0.handleRedirectCallback();
+		window.history.replaceState({}, document.title, window.location.pathname);
+	}
+
 	const isAuth = await auth0.isAuthenticated();
 	isAuthenticated.set(isAuth);
 
