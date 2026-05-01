@@ -1,6 +1,16 @@
+import 'dotenv/config';
 import { PrismaClient, Role } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import * as pg from 'pg';
 
-const prisma = new PrismaClient();
+const { Pool } = pg.default || pg;
+
+// Create a database connection pool using the environment variable
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+
+// Initialize Prisma Client with the driver adapter (Prisma 7 Best Practice)
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Seeding data...');
@@ -83,4 +93,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });
