@@ -29,6 +29,8 @@
 		});
 
 		socket.on('newMessage', (msg: Message) => {
+			// Prevent duplicates by removing optimistic version if it exists
+			messages = messages.filter(m => !m.id.startsWith('temp-') || m.content !== msg.content);
 			messages = [...messages, msg];
 			scrollToBottom();
 		});
