@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { RequestStatus } from '@prisma/client';
+import { RequestStatus } from '@akn/database';
 
 @Injectable()
 export class MentorshipService {

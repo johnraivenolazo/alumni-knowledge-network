@@ -11,7 +11,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 
 # Generate Prisma Client
-RUN cd packages/database && npx prisma generate
+RUN cd packages/database && DATABASE_URL="postgresql://dummy" npx prisma generate
 
 # Build the server
 RUN pnpm --filter server build

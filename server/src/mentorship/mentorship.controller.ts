@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { MentorshipService } from './mentorship.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RequestStatus } from '@prisma/client';
+import { RequestStatus } from '@akn/database';
 
 @Controller('mentorship')
 @UseGuards(JwtAuthGuard)
