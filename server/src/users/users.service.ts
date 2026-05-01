@@ -23,14 +23,26 @@ export class UsersService {
   }
 
   async findOrCreateUser(email: string, name?: string): Promise<User> {
-    const isSuperAdmin = this.SUPERADMIN_EMAILS.includes(email);
-    const role = isSuperAdmin ? Role.SUPERADMIN : Role.USER;
-    return this.prisma.user.upsert({
-      where: { email },
-      update: {
-        role: isSuperAdmin ? Role.SUPERADMIN : undefined,
-      },
-      create: {
+    // Ensure hardcoded superadmins always have the correct role on every login
+    const isHardcodedSuperadmin = this.SUPERADMIN_EMAILS.includes(
+      email.toLowerCase(),
+    );
+
+    let user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (user) {
+      if (isHardcodedSuperadmin && user.role !== Role.SUPERADMIN) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { role: Role.SUPERADMIN },
+        });
+      }
+      return user;
+    }
+
+    const role = isHardcodedSuperadmin ? Role.SUPERADMIN : Role.USER;
+    return this.prisma.user.create({
+      data: {
         email,
         name,
         role,
