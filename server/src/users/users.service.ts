@@ -6,7 +6,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class UsersService {
-  private readonly SUPERADMIN_EMAIL = 'jcesperanza@neu.edu.ph';
+  private readonly SUPERADMIN_EMAILS = ['jcesperanza@neu.edu.ph', 'johnraivenolazo@gmail.com'];
   private s3Client: S3Client;
 
   constructor(private prisma: PrismaService) {
@@ -20,11 +20,12 @@ export class UsersService {
   }
 
   async findOrCreateUser(email: string, name?: string): Promise<User> {
-    const role = email === this.SUPERADMIN_EMAIL ? Role.SUPERADMIN : Role.USER;
+    const isSuperAdmin = this.SUPERADMIN_EMAILS.includes(email);
+    const role = isSuperAdmin ? Role.SUPERADMIN : Role.USER;
     return this.prisma.user.upsert({
       where: { email },
       update: {
-        role: email === this.SUPERADMIN_EMAIL ? Role.SUPERADMIN : undefined,
+        role: isSuperAdmin ? Role.SUPERADMIN : undefined,
       },
       create: {
         email,
