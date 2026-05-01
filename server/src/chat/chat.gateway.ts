@@ -45,21 +45,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessage(
     @MessageBody() data: { requestId: string; senderId: string; content: string; receiverId: string },
   ) {
-    const message = await this.prisma.message.create({
-      data: {
-        content: data.content,
-        senderId: data.senderId,
-        receiverId: data.receiverId,
-        requestId: data.requestId,
-      },
-      include: {
-        sender: {
-          select: { name: true, profilePic: true },
+    console.log('Backend: Received sendMessage event', data);
+    try {
+      const message = await this.prisma.message.create({
+        data: {
+          content: data.content,
+          senderId: data.senderId,
+          receiverId: data.receiverId,
+          requestId: data.requestId,
         },
-      },
-    });
+        include: {
+          sender: {
+            select: { name: true, profilePic: true },
+          },
+        },
+      });
 
-    this.server.to(data.requestId).emit('newMessage', message);
-    return message;
+      console.log('Backend: Message created and broadcasting to room:', data.requestId);
+      this.server.to(data.requestId).emit('newMessage', message);
+      return message;
+    } catch (error) {
+      console.error('Backend: Error saving message:', error);
+      throw error;
+    }
   }
 }

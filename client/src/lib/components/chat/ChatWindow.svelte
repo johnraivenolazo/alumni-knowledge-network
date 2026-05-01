@@ -62,7 +62,22 @@
 		console.log('Sending message: ', msgPayload);
 		socket.emit('sendMessage', msgPayload);
 		
-		// Optimistic UI (Optional: can add to messages directly for instant feedback)
+		// Optimistic UI Update
+		const optimisticMsg: Message = {
+			id: 'temp-' + Date.now(),
+			content: newMessage,
+			senderId: $user?.id || '',
+			receiverId,
+			requestId,
+			createdAt: new Date().toISOString(),
+			sender: {
+				name: $user?.name || 'Me',
+				profilePic: $user?.profilePic
+			}
+		};
+		messages = [...messages, optimisticMsg];
+		scrollToBottom();
+		
 		newMessage = '';
 	}
 
