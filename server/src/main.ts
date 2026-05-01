@@ -7,7 +7,9 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: ['/'],
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
