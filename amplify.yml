@@ -1,10 +1,3 @@
-# AWS Amplify Hosting build spec
-# https://docs.aws.amazon.com/amplify/latest/userguide/build-settings.html
-#
-# This file is auto-detected by Amplify Console when you connect the repository.
-# It builds the SvelteKit client (a static SPA) from a pnpm monorepo and uploads
-# the contents of `client/build/` to Amplify's CDN. Environment variables that
-# start with `VITE_` are injected at build time and embedded into the bundle.
 version: 1
 applications:
   - appRoot: client
@@ -12,11 +5,13 @@ applications:
       phases:
         preBuild:
           commands:
+            - cd ..
             - corepack enable
             - corepack prepare pnpm@latest --activate
             - pnpm install --frozen-lockfile
         build:
           commands:
+            - cd ..
             - pnpm --filter client build
       artifacts:
         baseDirectory: build
