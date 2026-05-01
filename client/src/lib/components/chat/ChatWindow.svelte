@@ -18,8 +18,8 @@
 		const socketUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
 		
 		socket = io(socketUrl, {
-			extraHeaders: {
-				Authorization: `Bearer ${token}`
+			auth: {
+				token: `Bearer ${token}`
 			}
 		});
 
@@ -47,15 +47,22 @@
 	}
 
 	function sendMessage() {
-		if (!newMessage.trim() || !socket) return;
+		if (!newMessage.trim() || !socket) {
+			console.log('Cannot send: ', { msg: newMessage, socket: !!socket });
+			return;
+		}
 		
-		socket.emit('sendMessage', {
+		const msgPayload = {
 			requestId,
 			senderId: $user?.id,
 			receiverId,
 			content: newMessage
-		});
+		};
+
+		console.log('Sending message: ', msgPayload);
+		socket.emit('sendMessage', msgPayload);
 		
+		// Optimistic UI (Optional: can add to messages directly for instant feedback)
 		newMessage = '';
 	}
 
