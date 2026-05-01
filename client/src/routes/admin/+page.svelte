@@ -200,13 +200,13 @@
 													stroke-width="2"
 													stroke-linecap="round"
 													stroke-linejoin="round"
-													><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
-														d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
-													/></svg
+													><path d="M3 6h18" /><path
+														d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
+													/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg
 												>
 											</button>
 										{:else}
-											<span class="text-[10px] italic text-neutral-500 opacity-50">
+											<span class="text-[10px] text-neutral-500 italic opacity-50">
 												Protected Account
 											</span>
 										{/if}
