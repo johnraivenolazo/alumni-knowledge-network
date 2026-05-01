@@ -2,7 +2,7 @@
   "name": "@akn/database",
   "version": "1.0.0",
   "main": "index.ts",
-  "types": "dist-client/index.d.ts",
+  "types": "index.ts",
   "exports": {
     ".": "./index.ts"
   },
