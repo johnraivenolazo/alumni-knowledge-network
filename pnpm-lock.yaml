@@ -97,17 +97,17 @@ importers:
   packages/database:
     dependencies:
       '@prisma/adapter-pg':
-        specifier: ^7.8.0
+        specifier: 7.8.0
         version: 7.8.0
       '@prisma/client':
-        specifier: latest
+        specifier: 7.8.0
         version: 7.8.0(prisma@7.8.0(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3))(typescript@6.0.3)
       pg:
         specifier: ^8.20.0
         version: 8.20.0
     devDependencies:
       '@prisma/config':
-        specifier: ^7.8.0
+        specifier: 7.8.0
         version: 7.8.0
       '@prisma/sdk':
         specifier: ^4.0.0
@@ -119,7 +119,7 @@ importers:
         specifier: ^8.20.0
         version: 8.20.0
       prisma:
-        specifier: latest
+        specifier: 7.8.0
         version: 7.8.0(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3)
       ts-node:
         specifier: ^10.9.2
