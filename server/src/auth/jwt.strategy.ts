@@ -1,12 +1,19 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
-import { UsersService } from '../users/users.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@akn/database';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private usersService: UsersService) {
+  private readonly SUPERADMIN_EMAILS = [
+    'olazoraiven@gmail.com',
+    'bgduque@neu.edu.ph',
+    'raivenolazo@gmail.com',
+  ];
+
+  constructor(private prisma: PrismaService) {
     super({
       secretOrKeyProvider: passportJwtSecret({
         cache: true,
@@ -49,16 +56,39 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     if (!email) {
-      // Fallback if still no email (Prisma requires it)
-      console.warn(
-        'No email found in token or userinfo. Using sub as fallback.',
-      );
+      console.warn('No email found in token or userinfo. Using sub as fallback.');
       email = `${payload.sub}@fallback.akn`;
       name = name || 'Anonymous User';
     }
 
-    // Sync user with our database
-    const user = await this.usersService.findOrCreateUser(email, name);
-    return user;
+    // Direct Database Sync Logic (extracted from UsersService to break circular dependency)
+    const isHardcodedSuperadmin = this.SUPERADMIN_EMAILS.includes(
+      email.toLowerCase(),
+    );
+
+    let user = await this.prisma.user.findUnique({ where: { email } });
+    
+    if (user?.isBanned) {
+      throw new ForbiddenException('Your account has been banned');
+    }
+
+    if (user) {
+      if (isHardcodedSuperadmin && user.role !== Role.SUPERADMIN) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { role: Role.SUPERADMIN },
+        });
+      }
+      return user;
+    }
+
+    // Create new user if not found
+    return this.prisma.user.create({
+      data: {
+        email,
+        name,
+        role: isHardcodedSuperadmin ? Role.SUPERADMIN : Role.USER,
+      },
+    });
   }
 }
