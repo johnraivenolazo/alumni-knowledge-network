@@ -6,12 +6,15 @@
 	import { base } from '$app/paths';
 	import { fade, fly } from 'svelte/transition';
 
+	// Tracks whether the user dropdown menu is currently open.
 	let isMenuOpen = $state(false);
 
+	// Toggles the user dropdown menu between open and closed states.
 	function toggleMenu() {
 		isMenuOpen = !isMenuOpen;
 	}
-
+	// Explicitly closes the user dropdown menu. Called when the user clicks a menu item
+	// or clicks outside the menu container.
 	function closeMenu() {
 		isMenuOpen = false;
 	}
