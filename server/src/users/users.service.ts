@@ -108,9 +108,8 @@ export class UsersService {
   }) {
     return this.prisma.user.findMany({
       where: {
-        isBanned: false, // Don't show banned users in directory
-        industry: filters?.industry ? filters.industry : undefined, // Exact match for category
-        batch: filters?.batch ? filters.batch : undefined, // Exact match for batch
+        industry: filters?.industry ? filters.industry : undefined,
+        batch: filters?.batch ? filters.batch : undefined,
         OR: filters?.search
           ? [
               { name: { contains: filters.search, mode: 'insensitive' } },
