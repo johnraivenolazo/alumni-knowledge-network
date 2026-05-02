@@ -17,11 +17,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (!isValid) return false;
 
     const request = context.switchToHttp().getRequest();
-    
+
     // Direct DB check to avoid circular dependency with UsersService
     const user = await this.prisma.user.findUnique({
       where: { id: request.user.id },
-      select: { isBanned: true }
+      select: { isBanned: true },
     });
 
     if (user && user.isBanned) {

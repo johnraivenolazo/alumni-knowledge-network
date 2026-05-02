@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
@@ -56,7 +60,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     if (!email) {
-      console.warn('No email found in token or userinfo. Using sub as fallback.');
+      console.warn(
+        'No email found in token or userinfo. Using sub as fallback.',
+      );
       email = `${payload.sub}@fallback.akn`;
       name = name || 'Anonymous User';
     }
@@ -67,7 +73,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     );
 
     let user = await this.prisma.user.findUnique({ where: { email } });
-    
+
     if (user?.isBanned) {
       throw new ForbiddenException('Your account has been banned');
     }
