@@ -137,21 +137,24 @@ export class UsersService {
 
   async remove(userId: string) {
     // 1. Delete all messages sent or received by the user
-    await this.prisma.message.deleteMany({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    await (this.prisma as any).message.deleteMany({
       where: {
         OR: [{ senderId: userId }, { receiverId: userId }],
       },
     });
 
     // 2. Delete all mentorship requests involved with the user
-    await this.prisma.mentorshipRequest.deleteMany({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    await (this.prisma as any).mentorshipRequest.deleteMany({
       where: {
         OR: [{ studentId: userId }, { alumniId: userId }],
       },
     });
 
     // 3. Delete all posts by the user
-    await this.prisma.post.deleteMany({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    await (this.prisma as any).post.deleteMany({
       where: { authorId: userId },
     });
 

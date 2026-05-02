@@ -79,7 +79,7 @@
 								<p class="text-neutral-500">{profileUser.email}</p>
 							{/if}
 						</div>
-						
+
 						{#if isMyProfile && !isEditing}
 							<button
 								onclick={() => (isEditing = true)}
