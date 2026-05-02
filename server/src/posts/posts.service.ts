@@ -52,10 +52,18 @@ export class PostsService {
 
     // Hierarchy: Author, Admin, and Superadmin can delete
     const isAuthor = post.authorId === userId;
-    const isPrivileged =
-      userRole === Role.ADMIN || userRole === Role.SUPERADMIN;
+    
+    // Admin cannot delete Superadmin posts
+    const isSuperadmin = userRole === Role.SUPERADMIN;
+    const isAdmin = userRole === Role.ADMIN;
+    const targetIsSuperadmin = post.author.role === Role.SUPERADMIN;
 
-    if (!isAuthor && !isPrivileged) {
+    let canDelete = false;
+    if (isSuperadmin) canDelete = true;
+    if (isAuthor) canDelete = true;
+    if (isAdmin && !targetIsSuperadmin) canDelete = true;
+
+    if (!canDelete) {
       throw new ForbiddenException(
         'You do not have permission to delete this post',
       );

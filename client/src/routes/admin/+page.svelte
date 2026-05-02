@@ -45,6 +45,17 @@
 		}
 	}
 
+	async function handleToggleBan(userId: string, isBanned: boolean) {
+		const action = isBanned ? 'ban' : 'unban';
+		if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+		try {
+			await api.patch(`/users/${userId}/ban`, { isBanned });
+			await loadUsers();
+		} catch (e: unknown) {
+			alert((e as Error).message);
+		}
+	}
+
 	onMount(() => {
 		if (!$authLoading && !$isAuthenticated) {
 			goto('/login');
@@ -160,16 +171,23 @@
 								<td class="px-8 py-4 font-medium text-white">{u.name || 'N/A'}</td>
 								<td class="px-8 py-4 text-sm text-neutral-400">{u.email}</td>
 								<td class="px-8 py-4">
-									<span
-										class="rounded-full px-3 py-1 text-[10px] font-bold tracking-tighter uppercase
-                  {u.role === 'SUPERADMIN'
-											? 'bg-purple-500 text-white'
-											: u.role === 'ADMIN'
-												? 'bg-indigo-500 text-white'
-												: 'bg-neutral-800 text-neutral-400'}"
-									>
-										{u.role}
-									</span>
+									<div class="flex items-center gap-2">
+										<span
+											class="rounded-full px-3 py-1 text-[10px] font-bold tracking-tighter uppercase
+					{u.role === 'SUPERADMIN'
+												? 'bg-purple-500 text-white'
+												: u.role === 'ADMIN'
+													? 'bg-indigo-500 text-white'
+													: 'bg-neutral-800 text-neutral-400'}"
+										>
+											{u.role}
+										</span>
+										{#if u.isBanned}
+											<span class="rounded-full bg-red-500 px-3 py-1 text-[10px] font-bold tracking-tighter text-white uppercase animate-pulse">
+												Banned
+											</span>
+										{/if}
+									</div>
 								</td>
 								<td class="px-8 py-4">
 									<div class="flex items-center gap-3">
@@ -184,6 +202,18 @@
 												<option value="ADMIN">Make Admin</option>
 												<option value="SUPERADMIN">Make Superadmin</option>
 											</select>
+
+											<button
+												onclick={() => handleToggleBan(u.id, !u.isBanned)}
+												class="rounded-lg p-2 transition-all {u.isBanned ? 'bg-emerald-500/10 text-emerald-400 hover:text-emerald-300' : 'bg-orange-500/10 text-orange-400 hover:text-orange-300'}"
+												title={u.isBanned ? 'Unban User' : 'Ban User'}
+											>
+												{#if u.isBanned}
+													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+												{:else}
+													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+												{/if}
+											</button>
 
 											<button
 												onclick={() => handleDelete(u.id)}

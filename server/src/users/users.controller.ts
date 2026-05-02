@@ -99,6 +99,30 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
+  @Patch(':id/ban')
+  async toggleBan(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') targetId: string,
+    @Body() body: { isBanned: boolean },
+  ) {
+    const actorRole = req.user.role;
+    const targetUser = await this.usersService.findOne(targetId);
+
+    // Admins cannot ban Superadmins
+    if (actorRole === Role.ADMIN && targetUser.role === Role.SUPERADMIN) {
+      throw new ForbiddenException('Admins cannot ban Superadmins');
+    }
+
+    // Protection: Cannot ban yourself
+    if (req.user.id === targetId) {
+      throw new ForbiddenException('You cannot ban yourself');
+    }
+
+    return this.usersService.toggleBan(targetId, body.isBanned);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPERADMIN)
   @Delete(':id')
   async remove(@Param('id') id: string) {

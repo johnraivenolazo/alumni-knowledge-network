@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role, User } from '@akn/database';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -29,6 +29,9 @@ export class UsersService {
     );
 
     let user = await this.prisma.user.findUnique({ where: { email } });
+    if (user?.isBanned) {
+      throw new ForbiddenException('Your account has been banned');
+    }
 
     if (user) {
       if (isHardcodedSuperadmin && user.role !== Role.SUPERADMIN) {
@@ -94,15 +97,16 @@ export class UsersService {
   }
 
   // Admin Dashboard Tasks (AKN-8)
-  async findAll(filters?: { industry?: string; batch?: string }) {
+  async findAll(filters?: { industry?: string; batch?: string; search?: string }) {
     return this.prisma.user.findMany({
       where: {
-        industry: filters?.industry
-          ? { contains: filters.industry, mode: 'insensitive' }
-          : undefined,
-        batch: filters?.batch
-          ? { contains: filters.batch, mode: 'insensitive' }
-          : undefined,
+        isBanned: false, // Don't show banned users in directory
+        industry: filters?.industry ? filters.industry : undefined, // Exact match for category
+        batch: filters?.batch ? filters.batch : undefined, // Exact match for batch
+        OR: filters?.search ? [
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { bio: { contains: filters.search, mode: 'insensitive' } }
+        ] : undefined
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -112,6 +116,13 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id: userId },
       data: { role },
+    });
+  }
+
+  async toggleBan(userId: string, isBanned: boolean) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { isBanned },
     });
   }
 
