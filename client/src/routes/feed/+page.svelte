@@ -62,13 +62,6 @@
 <div class="mx-auto max-w-4xl px-4 py-12">
 	<div class="mb-12 flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-white">Knowledge Feed</h1>
-		{#if $isAuthenticated}
-			<button
-				class="rounded-lg bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700"
-			>
-				Create Post
-			</button>
-		{/if}
 	</div>
 
 	{#if $isAuthenticated}
