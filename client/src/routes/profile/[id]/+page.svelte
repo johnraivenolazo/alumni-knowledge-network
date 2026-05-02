@@ -60,25 +60,30 @@
 				</div>
 
 				<div class="flex-grow space-y-4">
-					<div class="flex items-start justify-between">
-						<div class="flex flex-wrap items-center gap-3">
-							<h1 class="text-4xl font-bold">{profileUser.name}</h1>
-							<span
-								class="rounded-full border px-3 py-1 text-[10px] font-black tracking-widest uppercase
-								{profileUser.role === 'SUPERADMIN'
-									? 'border-purple-500/20 bg-purple-500/10 text-purple-400'
-									: profileUser.role === 'ADMIN'
-										? 'border-indigo-500/20 bg-indigo-500/10 text-indigo-400'
-										: 'border-neutral-700 bg-neutral-800 text-neutral-500'}"
-							>
-								{profileUser.role || 'User'}
-							</span>
+					<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+						<div class="space-y-1">
+							<div class="flex flex-wrap items-center gap-3">
+								<h1 class="text-4xl font-bold">{profileUser.name || profileUser.email}</h1>
+								<span
+									class="rounded-full border px-3 py-1 text-[10px] font-black tracking-widest uppercase
+									{profileUser.role === 'SUPERADMIN'
+										? 'border-purple-500/20 bg-purple-500/10 text-purple-400'
+										: profileUser.role === 'ADMIN'
+											? 'border-indigo-500/20 bg-indigo-500/10 text-indigo-400'
+											: 'border-neutral-700 bg-neutral-800 text-neutral-500'}"
+								>
+									{profileUser.role || 'User'}
+								</span>
+							</div>
+							{#if profileUser.name && profileUser.name !== profileUser.email}
+								<p class="text-neutral-500">{profileUser.email}</p>
+							{/if}
 						</div>
-						<p class="text-neutral-500">{profileUser.email}</p>
+						
 						{#if isMyProfile && !isEditing}
 							<button
 								onclick={() => (isEditing = true)}
-								class="rounded-full bg-neutral-800 px-6 py-2 text-white transition-all hover:bg-neutral-700"
+								class="flex-shrink-0 rounded-full bg-neutral-800 px-6 py-2 text-white transition-all hover:bg-neutral-700 active:scale-95"
 							>
 								Edit Profile
 							</button>
