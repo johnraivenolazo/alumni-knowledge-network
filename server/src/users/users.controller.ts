@@ -11,11 +11,12 @@ import {
   Query,
   Delete,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { Role } from '@akn/database';
+import { Role, User } from '@akn/database';
 
 interface AuthenticatedRequest extends Request {
   user: { id: string; email: string; role: Role; name?: string };
@@ -38,9 +39,10 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('me')
-  updateMe(@Req() req: AuthenticatedRequest, @Body() body: any) {
-    delete body.role;
-    return this.usersService.update(req.user.id, body);
+  updateMe(@Req() req: AuthenticatedRequest, @Body() body: Partial<User>) {
+    const updateData = { ...body };
+    delete updateData.role;
+    return this.usersService.update(req.user.id, updateData);
   }
 
   @UseGuards(JwtAuthGuard)

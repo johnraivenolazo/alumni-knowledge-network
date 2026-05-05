@@ -1,13 +1,22 @@
 import {
   Injectable,
-  UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
+import { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@akn/database';
+
+interface JwtPayload {
+  sub: string;
+  email?: string;
+  name?: string;
+  'https://akn-api.com/email'?: string;
+  'https://akn-api.com/name'?: string;
+  [key: string]: any;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -34,7 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(req: any, payload: any) {
+  async validate(req: Request, payload: JwtPayload) {
     let email = payload.email || payload['https://akn-api.com/email'];
     let name = payload.name || payload['https://akn-api.com/name'];
 
@@ -50,7 +59,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             },
           );
           if (response.ok) {
-            const userInfo = await response.json();
+            const userInfo = (await response.json()) as {
+              email?: string;
+              name?: string;
+              nickname?: string;
+            };
             email = userInfo.email;
             name = userInfo.name || userInfo.nickname;
           }

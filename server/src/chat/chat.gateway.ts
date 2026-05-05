@@ -33,11 +33,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(
+  async handleJoinRoom(
     @MessageBody() data: { requestId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(data.requestId);
+    await client.join(data.requestId);
     return { event: 'joinedRoom', data: data.requestId };
   }
 
@@ -51,25 +51,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       receiverId: string;
     },
   ) {
-    try {
-      const message = await this.prisma.message.create({
-        data: {
-          content: data.content,
-          senderId: data.senderId,
-          receiverId: data.receiverId,
-          requestId: data.requestId,
+    const message = await this.prisma.message.create({
+      data: {
+        content: data.content,
+        senderId: data.senderId,
+        receiverId: data.receiverId,
+        requestId: data.requestId,
+      },
+      include: {
+        sender: {
+          select: { name: true, profilePic: true },
         },
-        include: {
-          sender: {
-            select: { name: true, profilePic: true },
-          },
-        },
-      });
+      },
+    });
 
-      this.server.to(data.requestId).emit('newMessage', message);
-      return message;
-    } catch (error) {
-      throw error;
-    }
+    this.server.to(data.requestId).emit('newMessage', message);
+    return message;
   }
 }
