@@ -50,6 +50,7 @@ export class MentorshipService {
     requestId: string,
     status: RequestStatus,
     userId: string,
+    userRole?: string,
   ) {
     const request = await this.prisma.mentorshipRequest.findUnique({
       where: { id: requestId },
@@ -58,12 +59,16 @@ export class MentorshipService {
 
     if (!request) throw new NotFoundException('Request not found');
 
+    const isAdmin = userRole === 'ADMIN' || userRole === 'SUPERADMIN';
+    const isStudent = String(request.studentId) === String(userId);
+    const isAlumni = String(request.alumniId) === String(userId);
+
     if (status === RequestStatus.CANCELLED) {
-      if (request.alumniId !== userId && request.studentId !== userId) {
+      if (!isStudent && !isAlumni && !isAdmin) {
         throw new ForbiddenException('Unauthorized');
       }
     } else {
-      if (request.alumniId !== userId) {
+      if (!isAlumni && !isAdmin) {
         throw new ForbiddenException('Unauthorized');
       }
     }
