@@ -9,18 +9,26 @@
 
 	let requests = $state<MentorshipRequest[]>([]);
 	let alumniList = $state<User[]>([]);
-	let search = $state({ industry: '', batch: '' });
+
+	let filterQuery = $state('');
+	let filterIndustry = $state('');
+	let filterBatch = $state('');
+
 	let requestMessage = $state('');
 	let selectedAlumni = $state<User | null>(null);
 	let activeChatRequest = $state<MentorshipRequest | null>(null);
 	let loading = $state(true);
+
+	let searchTimeout: ReturnType<typeof setTimeout>;
 
 	async function loadData() {
 		loading = true;
 		try {
 			const [reqs, alums] = await Promise.all([
 				api.get('/mentorship/my-requests'),
-				api.get(`/users?userType=ALUMNI&industry=${search.industry}&batch=${search.batch}`)
+				api.get(
+					`/users?userType=ALUMNI&search=${encodeURIComponent(filterQuery)}&industry=${encodeURIComponent(filterIndustry)}&batch=${encodeURIComponent(filterBatch)}`
+				)
 			]);
 			requests = reqs;
 			alumniList = alums;
@@ -31,12 +39,19 @@
 		}
 	}
 
+	function handleSearch() {
+		clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(() => {
+			loadData();
+		}, 400);
+	}
+
 	async function sendRequest() {
-		if (!selectedAlumni || !requestMessage) return;
+		if (!selectedAlumni) return;
 		try {
 			await api.post('/mentorship/request', {
 				alumniId: selectedAlumni.id,
-				message: requestMessage
+				message: requestMessage || 'I would like to connect with you for mentorship.'
 			});
 			requestMessage = '';
 			selectedAlumni = null;
@@ -70,298 +85,274 @@
 	const isAlumni = $derived($user?.userType === 'ALUMNI');
 </script>
 
-<div class="mx-auto max-w-7xl space-y-12 px-4 py-12">
+<div class="mx-auto max-w-6xl px-6 py-20 font-sans">
 	{#if $isAuthenticated}
 		<!-- Header Section -->
-		<div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-			<div in:fly={{ y: -20, duration: 600 }}>
-				<h1 class="text-5xl font-black tracking-tighter text-white">Mentorship Hub</h1>
-				<p class="mt-2 text-neutral-500">
-					{isAlumni
-						? 'Manage your mentorship connections and incoming student requests.'
-						: 'Connect with industry experts and accelerate your career growth.'}
-				</p>
-			</div>
+		<header class="mb-20 border-b border-white/10 pb-10">
+			<h1 class="text-4xl font-light tracking-tight text-white sm:text-5xl">Mentorship</h1>
+			<p class="mt-6 max-w-2xl text-lg leading-relaxed font-light text-neutral-400">
+				{isAlumni
+					? 'Manage your connections and incoming requests from the student network.'
+					: 'Connect with industry experts and accelerate your professional growth.'}
+			</p>
+		</header>
 
-			<div class="flex items-center gap-4 rounded-2xl border border-white/5 bg-neutral-900/50 p-2">
-				<div class="px-4 py-2 text-xs font-bold tracking-widest text-neutral-400 uppercase">
-					Your Role
-				</div>
-				<div
-					class="rounded-xl px-6 py-2 text-[10px] font-black tracking-widest text-white uppercase shadow-lg transition-all
-                    {$user?.userType === 'ALUMNI'
-						? 'bg-emerald-600 shadow-emerald-500/20'
-						: 'bg-indigo-500 shadow-indigo-500/20'}"
-				>
-					{$user?.userType || 'STUDENT'}
-				</div>
-			</div>
-		</div>
+		<!-- ACTIVE CONNECTIONS -->
+		{#if activeMentorships.length > 0}
+			<section class="mb-24">
+				<h2 class="mb-8 text-xs font-bold tracking-widest text-neutral-500 uppercase">
+					Active Connections
+				</h2>
 
-		<!-- 1. ACTIVE CONNECTIONS -->
-		<section class="space-y-6">
-			<div class="flex items-center gap-3">
-				<div class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></div>
-				<h2 class="text-xl font-bold tracking-tight text-white">Active Connections</h2>
-			</div>
-
-			{#if loading}
-				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{#each Array(3) as _, i (i)}
-						<div class="rounded-3xl border border-white/5 bg-neutral-900/50 p-8">
-							<div class="mb-8 flex items-center gap-4">
-								<Skeleton class="h-14 w-14 rounded-2xl" />
-								<div class="space-y-2">
-									<Skeleton class="h-5 w-32" />
-									<Skeleton class="h-3 w-48" />
-								</div>
-							</div>
-							<Skeleton class="h-12 w-full rounded-2xl" />
-						</div>
-					{/each}
-				</div>
-			{:else if activeMentorships.length === 0}
-				<div
-					class="rounded-3xl border border-dashed border-white/5 bg-neutral-900/20 py-20 text-center"
-				>
-					<p class="text-neutral-500 italic">No active connections yet.</p>
-				</div>
-			{:else}
-				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div class="flex flex-col border-t border-white/10">
 					{#each activeMentorships as req (req.id)}
 						{@const partner = req.studentId === $user?.id ? req.alumni : req.student}
 						<div
 							in:fly={{ y: 20, duration: 300 }}
 							out:slide={{ duration: 300 }}
-							class="group relative overflow-hidden rounded-3xl border border-white/5 bg-neutral-900/50 p-8 transition-all hover:border-indigo-500/30 hover:bg-neutral-800/50"
+							class="group -mx-4 flex flex-col justify-between gap-6 border-b border-white/5 px-4 py-8 transition-colors hover:bg-white/[0.02] sm:flex-row sm:items-center"
 						>
-							<div class="mb-8 flex items-center gap-4">
+							<div class="flex items-center gap-6">
 								<div
-									class="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-500/10 bg-indigo-500/20 text-2xl font-bold text-indigo-400"
+									class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-lg font-light text-neutral-300"
 								>
-									{partner.name[0]}
+									{#if partner.profilePic}
+										<img
+											src={partner.profilePic}
+											alt={partner.name}
+											class="h-full w-full rounded-full object-cover"
+										/>
+									{:else}
+										{partner.name[0]}
+									{/if}
 								</div>
 								<div>
-									<h3 class="text-lg font-bold text-white">{partner.name}</h3>
-									<p class="text-[10px] font-black tracking-widest text-neutral-500 uppercase">
+									<h3 class="text-xl font-medium text-white">{partner.name}</h3>
+									<p class="mt-1 text-sm text-neutral-500">
 										{partner.industry || 'General'} • {partner.userType}
 									</p>
 								</div>
 							</div>
-							<div class="flex gap-3">
+
+							<div
+								class="flex items-center gap-6 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+							>
 								<button
 									onclick={() => (activeChatRequest = req)}
-									class="flex-grow rounded-2xl bg-white py-3 text-sm font-black text-black transition-all hover:bg-neutral-200"
-									>Open Chat</button
+									class="text-sm font-medium text-white underline-offset-4 hover:underline"
 								>
+									Message
+								</button>
 								<button
 									onclick={() => {
 										if (confirm('Are you sure you want to end this connection?')) {
 											handleResponse(req.id, 'CANCELLED');
 										}
 									}}
-									class="rounded-2xl bg-neutral-800 p-3 text-neutral-500 transition-all hover:bg-red-500/10 hover:text-red-400"
+									class="text-sm font-medium text-neutral-600 transition-colors hover:text-red-400"
 								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="20"
-										height="20"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2.5"
-										stroke-linecap="round"
-										stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg
-									>
+									End Connection
 								</button>
 							</div>
 						</div>
 					{/each}
 				</div>
-			{/if}
-		</section>
+			</section>
+		{/if}
 
-		<div class="grid grid-cols-1 gap-12 pt-8 lg:grid-cols-12">
-			<!-- 2. REQUESTS INBOX -->
-			<div class="space-y-6 lg:col-span-5">
-				<h2 class="text-xl font-bold tracking-tight text-white">Requests Inbox</h2>
-				{#if loading}
-					<div class="space-y-4">
+		<div class="grid grid-cols-1 gap-20 lg:grid-cols-12">
+			<!-- REQUESTS INBOX -->
+			<div class="lg:col-span-5">
+				<h2 class="mb-8 text-xs font-bold tracking-widest text-neutral-500 uppercase">
+					Requests Inbox
+				</h2>
+
+				{#if loading && pendingRequests.length === 0}
+					<div class="space-y-8 border-t border-white/10 pt-8">
 						{#each Array(2) as _, i (i)}
-							<div class="rounded-3xl border border-white/5 bg-neutral-900/30 p-8">
-								<Skeleton class="mb-2 h-4 w-24" />
-								<Skeleton class="mb-6 h-6 w-48" />
-								<Skeleton class="mb-6 h-16 w-full" />
-								<div class="flex gap-2">
-									<Skeleton class="h-12 flex-grow" />
-									<Skeleton class="h-12 w-24" />
-								</div>
+							<div class="space-y-4 border-b border-white/5 pb-8">
+								<Skeleton class="h-5 w-32" />
+								<Skeleton class="h-16 w-full" />
+								<Skeleton class="h-4 w-24" />
 							</div>
 						{/each}
 					</div>
 				{:else if pendingRequests.length === 0}
-					<div class="rounded-3xl border border-dashed border-white/5 bg-white/5 py-12 text-center">
-						<p class="text-sm text-neutral-600 italic">No pending requests.</p>
+					<div class="border-t border-white/10 pt-12">
+						<p class="text-sm font-light text-neutral-600 italic">Inbox is empty.</p>
 					</div>
 				{:else}
-					<div class="space-y-4">
+					<div class="flex flex-col border-t border-white/10">
 						{#each pendingRequests as req (req.id)}
 							{@const isSender = req.studentId === $user?.id}
 							{@const partner = isSender ? req.alumni : req.student}
-							<div class="rounded-3xl border border-white/5 bg-neutral-900/30 p-8 backdrop-blur-md">
-								<div class="mb-6 flex items-start justify-between">
-									<div>
-										<p
-											class="mb-1 text-[10px] font-black tracking-widest text-indigo-400 uppercase"
-										>
-											{isSender ? 'Outgoing Request' : 'Incoming Request'}
-										</p>
-										<h3 class="text-xl font-bold text-white">{partner.name}</h3>
-									</div>
-									<span
-										class="rounded-md bg-white/5 px-2 py-1 text-[10px] font-bold text-neutral-600"
-										>{new Date(req.createdAt).toLocaleDateString()}</span
-									>
+							<div class="border-b border-white/5 py-8">
+								<div class="mb-4 flex items-start justify-between">
+									<h3 class="text-lg font-medium text-white">{partner.name}</h3>
+									<span class="text-[10px] font-bold tracking-widest text-neutral-600 uppercase">
+										{isSender ? 'Sent' : 'Received'}
+									</span>
 								</div>
-								<p
-									class="mb-8 border-l-2 border-white/10 pl-4 text-sm leading-relaxed text-neutral-400 italic"
-								>
+								<p class="mb-8 text-sm leading-relaxed text-neutral-400">
 									"{req.message}"
 								</p>
-								{#if !isSender}
-									<div class="flex gap-3">
+
+								<div class="flex gap-6">
+									{#if !isSender}
 										<button
 											onclick={() => handleResponse(req.id, 'ACCEPTED')}
-											class="flex-grow rounded-2xl bg-indigo-500 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-600"
-											>Accept</button
+											class="text-sm font-medium text-white underline-offset-4 hover:underline"
 										>
+											Accept
+										</button>
 										<button
 											onclick={() => handleResponse(req.id, 'DECLINED')}
-											class="rounded-2xl bg-neutral-800 px-6 py-3 text-sm font-bold text-neutral-400 transition-all hover:text-white"
-											>Decline</button
+											class="text-sm font-medium text-neutral-600 transition-colors hover:text-white"
 										>
-									</div>
-								{:else}
-									<div
-										class="w-full rounded-2xl border border-white/5 bg-white/5 py-3 text-center text-xs font-black tracking-widest text-neutral-500 uppercase"
-									>
-										Awaiting Response
-									</div>
-								{/if}
+											Decline
+										</button>
+									{:else}
+										<span class="text-xs font-bold tracking-widest text-neutral-600 uppercase"
+											>Awaiting Response</span
+										>
+									{/if}
+								</div>
 							</div>
 						{/each}
 					</div>
 				{/if}
 			</div>
 
-			<!-- 3. DISCOVER ALUMNI -->
-			<div class="space-y-6 lg:col-span-7">
-				<div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-					<h2 class="text-xl font-bold tracking-tight text-white">
-						{isAlumni ? 'Other Alumni' : 'Find your Mentor'}
-					</h2>
-					<div class="flex gap-2">
+			<!-- DISCOVER ALUMNI -->
+			<div class="lg:col-span-7">
+				<h2 class="mb-8 text-xs font-bold tracking-widest text-neutral-500 uppercase">
+					{isAlumni ? 'Network Directory' : 'Discover Mentors'}
+				</h2>
+
+				<!-- Filters -->
+				<div class="mb-12 flex flex-col gap-6 sm:flex-row">
+					<div class="relative w-full">
 						<input
-							bind:value={search.industry}
-							oninput={loadData}
-							placeholder="Filter by Industry..."
-							class="w-full rounded-full border border-white/5 bg-neutral-950 px-6 py-2 text-xs transition-all outline-none focus:border-indigo-500"
+							bind:value={filterQuery}
+							oninput={handleSearch}
+							placeholder="Search names or bios..."
+							class="w-full border-b border-white/10 bg-transparent pt-4 pb-3 text-sm text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
+						/>
+					</div>
+					<div class="relative w-full sm:w-1/3">
+						<input
+							bind:value={filterIndustry}
+							oninput={handleSearch}
+							placeholder="Industry..."
+							class="w-full border-b border-white/10 bg-transparent pt-4 pb-3 text-sm text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
+						/>
+					</div>
+					<div class="relative w-full sm:w-1/4">
+						<input
+							bind:value={filterBatch}
+							oninput={handleSearch}
+							placeholder="Batch..."
+							class="w-full border-b border-white/10 bg-transparent pt-4 pb-3 text-sm text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
 						/>
 					</div>
 				</div>
 
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					{#if loading}
+				<div class="flex flex-col border-t border-white/10">
+					{#if loading && alumniList.length === 0}
 						{#each Array(4) as _, i (i)}
-							<div class="rounded-3xl border border-white/5 bg-neutral-900/20 p-6">
-								<div class="mb-6 flex items-center gap-4">
-									<Skeleton class="h-12 w-12 rounded-2xl" />
-									<div class="space-y-2">
-										<Skeleton class="h-4 w-24" />
-										<Skeleton class="h-3 w-32" />
-									</div>
+							<div class="flex items-center gap-6 border-b border-white/5 py-6">
+								<Skeleton class="h-12 w-12 rounded-full" />
+								<div class="flex-grow space-y-3">
+									<Skeleton class="h-4 w-32" />
+									<Skeleton class="h-3 w-48" />
 								</div>
-								<Skeleton class="h-10 w-full rounded-2xl" />
 							</div>
 						{/each}
 					{:else}
 						{#each alumniList.filter((a) => a.id !== $user?.id) as alum (alum.id)}
 							{@const status = getAlumniStatus(alum.id)}
 							<div
-								class="flex flex-col justify-between rounded-3xl border border-white/5 bg-neutral-900/20 p-6 transition-all hover:border-white/10 hover:bg-neutral-900/40"
+								class="group -mx-4 flex flex-col justify-between gap-4 border-b border-white/5 px-4 py-6 transition-colors hover:bg-white/[0.02] sm:flex-row sm:items-center"
 							>
-								<div class="mb-6 flex items-center gap-4">
+								<div class="flex items-center gap-6">
 									<div
-										class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-white/5 bg-neutral-800 font-bold text-neutral-500"
+										class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-sm font-light text-neutral-400"
 									>
 										{#if alum.profilePic}
 											<img
 												src={alum.profilePic}
 												alt={alum.name}
-												class="h-full w-full object-cover"
+												class="h-full w-full rounded-full object-cover"
 											/>
 										{:else}
 											{alum.name[0]}
 										{/if}
 									</div>
 									<div>
-										<h3 class="text-base font-bold text-white">{alum.name}</h3>
-										<p class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
+										<div class="flex items-center gap-3">
+											<h3 class="text-base font-medium text-white">{alum.name}</h3>
+											{#if alum.isExpert}
+												<span
+													class="bg-white px-1.5 py-0.5 text-[9px] font-bold tracking-widest text-black uppercase"
+													>Expert</span
+												>
+											{/if}
+										</div>
+										<p class="mt-1 text-sm text-neutral-500">
 											{alum.industry || 'General'} • {alum.batch
 												? `Batch ${alum.batch}`
 												: 'Alumnus'}
 										</p>
 									</div>
 								</div>
-								{#if status === 'ACCEPTED'}
-									<div
-										class="flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 py-2.5 text-xs font-black tracking-widest text-emerald-500 uppercase"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="14"
-											height="14"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="3"
-											stroke-linecap="round"
-											stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg
-										> Active
-									</div>
-								{:else}
-									<button
-										onclick={() => (status === 'PENDING' ? null : (selectedAlumni = alum))}
-										disabled={status === 'PENDING' || isAlumni}
-										class="w-full rounded-2xl py-2.5 text-xs font-black tracking-widest uppercase transition-all {status ===
-										'PENDING'
-											? 'border border-white/5 bg-white/5 text-neutral-600'
-											: isAlumni
-												? 'cursor-not-allowed bg-neutral-800/50 text-neutral-600'
-												: 'border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white hover:shadow-lg hover:shadow-indigo-500/20'}"
-									>
-										{status === 'PENDING' ? 'Requested' : isAlumni ? 'Alumnus' : 'Connect'}
-									</button>
-								{/if}
+
+								<div class="mt-2 flex shrink-0 sm:mt-0">
+									{#if status === 'ACCEPTED'}
+										<span class="text-xs font-bold tracking-widest text-neutral-600 uppercase"
+											>Active</span
+										>
+									{:else if status === 'PENDING'}
+										<span class="text-xs font-bold tracking-widest text-neutral-600 uppercase"
+											>Requested</span
+										>
+									{:else if isAlumni}
+										<span class="text-xs font-bold tracking-widest text-neutral-600 uppercase"
+											>Alumnus</span
+										>
+									{:else}
+										<button
+											onclick={() => (selectedAlumni = alum)}
+											class="text-sm font-medium text-white underline-offset-4 hover:underline"
+										>
+											Connect
+										</button>
+									{/if}
+								</div>
 							</div>
 						{/each}
+						{#if alumniList.length === 0}
+							<div class="py-12">
+								<p class="text-sm font-light text-neutral-600 italic">
+									No members found matching your filters.
+								</p>
+							</div>
+						{/if}
 					{/if}
 				</div>
 			</div>
 		</div>
 	{:else}
-		<div
-			class="flex flex-col items-center justify-center rounded-[4rem] border border-white/5 bg-neutral-900/50 py-32 text-center backdrop-blur-sm"
-		>
-			<h2 class="mb-4 text-5xl font-black tracking-tighter text-white">Connect with Mentors</h2>
-			<p class="mb-10 max-w-md text-lg leading-relaxed text-neutral-500">
-				Join the network to find mentors, share insights, and accelerate your career growth.
+		<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
+			<h2 class="mb-6 text-5xl font-light tracking-tight text-white">Connect</h2>
+			<p class="mb-12 max-w-md text-lg leading-relaxed font-light text-neutral-500">
+				Join the network to find mentors, share insights, and accelerate your career.
 			</p>
 			<button
 				onclick={() => (window.location.href = '/login')}
-				class="rounded-full bg-white px-16 py-4 font-black text-black shadow-2xl shadow-white/10 transition-all hover:scale-105"
-				>Sign In to Network</button
+				class="bg-white px-10 py-4 text-sm font-medium text-black transition-transform hover:scale-105"
 			>
+				Sign In
+			</button>
 		</div>
 	{/if}
 </div>
@@ -374,10 +365,10 @@
 			: activeChatRequest.student}
 	<div
 		transition:fade={{ duration: 300 }}
-		class="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4 backdrop-blur-2xl"
+		class="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4 backdrop-blur-xl"
 	>
 		<div
-			in:fly={{ y: 100, duration: 600, easing: (t) => 1 - Math.pow(1 - t, 4) }}
+			in:fly={{ y: 50, duration: 500, easing: (t) => 1 - Math.pow(1 - t, 4) }}
 			class="relative w-full max-w-2xl"
 		>
 			<ChatWindow
@@ -398,52 +389,34 @@
 		class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-xl"
 	>
 		<div
-			in:fly={{ y: 50, duration: 400 }}
-			class="w-full max-w-md space-y-8 rounded-[3rem] border border-white/10 bg-neutral-900 p-12 shadow-[0_0_100px_rgba(79,70,229,0.1)]"
+			in:fly={{ y: 20, duration: 400 }}
+			class="w-full max-w-lg border border-white/10 bg-neutral-950 p-12 shadow-2xl"
 		>
-			<div class="text-center">
-				<div
-					class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-500"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="32"
-						height="32"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2.5"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle
-							cx="9"
-							cy="7"
-							r="4"
-						/><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg
-					>
-				</div>
-				<h2 class="text-3xl font-black tracking-tighter text-white">Mentorship Request</h2>
-				<p class="mt-2 text-neutral-500">
-					Sending to <span class="font-bold text-indigo-400">{selectedAlumni.name}</span>
-				</p>
-			</div>
+			<h2 class="mb-3 text-2xl font-light text-white">Connect with {selectedAlumni.name}</h2>
+			<p class="mb-10 text-sm text-neutral-500">
+				Introduce yourself and share what you hope to learn.
+			</p>
+
 			<textarea
 				bind:value={requestMessage}
-				placeholder="Introduce yourself and explain what you hope to learn..."
-				rows="5"
-				class="w-full rounded-[2rem] border border-white/5 bg-neutral-950 px-6 py-5 text-white transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none"
+				placeholder="Your message..."
+				rows="4"
+				class="w-full resize-none border-b border-white/20 bg-transparent py-4 text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
 			></textarea>
-			<div class="flex flex-col gap-3">
-				<button
-					onclick={sendRequest}
-					class="w-full rounded-[2rem] bg-indigo-500 py-4 font-black text-white shadow-xl shadow-indigo-500/20 transition-all hover:bg-indigo-600 active:scale-95"
-					>Send Request</button
-				>
+
+			<div class="mt-12 flex justify-end gap-8">
 				<button
 					onclick={() => (selectedAlumni = null)}
-					class="w-full py-4 font-bold text-neutral-500 transition-all hover:text-white"
-					>Dismiss</button
+					class="text-sm font-medium text-neutral-500 transition-colors hover:text-white"
 				>
+					Cancel
+				</button>
+				<button
+					onclick={sendRequest}
+					class="text-sm font-medium text-white underline-offset-4 hover:underline"
+				>
+					Send Request
+				</button>
 			</div>
 		</div>
 	</div>

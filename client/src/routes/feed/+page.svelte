@@ -79,24 +79,24 @@
 </script>
 
 {#snippet commentSnippet(comment: Comment)}
-	<div class="flex gap-3 border-t border-white/5 py-3 last:pb-0">
+	<div class="flex gap-4 border-t border-white/5 pt-4">
 		<div
-			class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-800 text-[10px] font-bold text-white"
+			class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-light text-neutral-400"
 		>
 			{#if comment.author?.profilePic}
 				<img
 					src={comment.author.profilePic}
 					alt={comment.author.name}
-					class="h-full w-full object-cover"
+					class="h-full w-full rounded-full object-cover"
 				/>
 			{:else}
 				{comment.author?.name?.charAt(0) || 'U'}
 			{/if}
 		</div>
-		<div class="flex-grow">
-			<div class="mb-1 flex items-center gap-2">
-				<span class="text-xs font-bold text-white">{comment.author?.name}</span>
-				<span class="text-[10px] text-neutral-500"
+		<div class="flex-grow pb-4">
+			<div class="mb-1 flex items-center gap-3">
+				<span class="text-sm font-medium text-white">{comment.author?.name}</span>
+				<span class="text-[10px] font-bold tracking-widest text-neutral-600 uppercase"
 					>{new Date(comment.createdAt).toLocaleDateString()}</span
 				>
 			</div>
@@ -105,277 +105,215 @@
 	</div>
 {/snippet}
 
-<div class="mx-auto max-w-5xl px-4 py-12">
-	<div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-		<div>
-			<h1 class="text-4xl font-black tracking-tighter text-white">Knowledge Feed</h1>
-			<p class="text-neutral-500">Industry insights, mentorship advice, and campus updates.</p>
-		</div>
-
-		<!-- Category Filter -->
-		<div class="scrollbar-hide flex gap-2 overflow-x-auto pb-2">
-			{#each categories as cat (cat)}
-				<button
-					onclick={() => (activeCategory = cat)}
-					class="rounded-full border px-4 py-1.5 text-xs font-bold transition-all
-                    {activeCategory === cat
-						? 'border-white bg-white text-black'
-						: 'border-neutral-800 bg-transparent text-neutral-400 hover:border-neutral-600'}"
-				>
-					{cat}
-				</button>
-			{/each}
-		</div>
-	</div>
-
+<div class="mx-auto max-w-4xl px-6 py-20 font-sans">
 	{#if $isAuthenticated}
-		<form
-			onsubmit={handleSubmit}
-			class="mb-12 space-y-4 rounded-3xl border border-white/5 bg-neutral-900/50 p-8 backdrop-blur-xl"
-		>
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-xl font-bold text-white">Share Expertise</h2>
+		<header class="mb-16 border-b border-white/10 pb-10">
+			<h1 class="text-4xl font-light tracking-tight text-white sm:text-5xl">Knowledge Feed</h1>
+			<p class="mt-6 max-w-2xl text-lg leading-relaxed font-light text-neutral-400">
+				Industry insights, mentorship advice, and campus updates from the alumni network.
+			</p>
+
+			<div class="scrollbar-hide mt-12 flex gap-8 overflow-x-auto pb-2">
+				{#each categories as cat (cat)}
+					<button
+						onclick={() => (activeCategory = cat)}
+						class="text-xs font-bold tracking-widest whitespace-nowrap uppercase transition-colors {activeCategory ===
+						cat
+							? 'text-white'
+							: 'text-neutral-600 hover:text-neutral-400'}"
+					>
+						{cat}
+					</button>
+				{/each}
+			</div>
+		</header>
+
+		<form onsubmit={handleSubmit} class="mb-20 space-y-6">
+			<div class="flex items-center justify-between">
+				<h2 class="text-xs font-bold tracking-widest text-neutral-500 uppercase">
+					Share Expertise
+				</h2>
 				<select
 					bind:value={newPost.category}
-					class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1 text-xs text-neutral-400 focus:border-indigo-500 focus:outline-none"
+					class="bg-transparent text-xs font-bold tracking-widest text-neutral-500 uppercase outline-none focus:text-white"
 				>
 					{#each categories.filter((c) => c !== 'All') as cat (cat)}
-						<option value={cat}>{cat}</option>
+						<option value={cat} class="bg-neutral-900">{cat}</option>
 					{/each}
 				</select>
 			</div>
+
 			<input
 				bind:value={newPost.title}
 				placeholder="Topic Title"
-				class="w-full rounded-xl border border-white/5 bg-neutral-950/50 px-5 py-3 text-white transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none"
+				class="w-full border-b border-white/10 bg-transparent py-4 text-xl font-light text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
 			/>
+
 			<textarea
 				bind:value={newPost.content}
 				placeholder="What insights do you want to share with the community?"
-				rows="4"
-				class="w-full rounded-xl border border-white/5 bg-neutral-950/50 px-5 py-3 text-white transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none"
+				rows="3"
+				class="w-full resize-none border-b border-white/10 bg-transparent py-4 text-sm leading-relaxed font-light text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
 			></textarea>
+
 			{#if error}
-				<p class="text-sm text-red-500">{error}</p>
+				<p class="text-xs text-red-400">{error}</p>
 			{/if}
-			<div class="flex justify-end">
+
+			<div class="flex justify-end pt-4">
 				<button
 					type="submit"
-					class="group flex items-center gap-2 rounded-xl bg-indigo-500 px-8 py-3 font-bold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-600 active:scale-95"
+					class="text-sm font-medium text-white underline-offset-4 hover:underline"
 				>
 					Publish Post
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="18"
-						height="18"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="transition-transform group-hover:translate-x-1"
-						><line x1="22" y1="2" x2="11" y2="13" /><polyline
-							points="22 2 15 22 11 13 2 9 22 2"
-						/></svg
-					>
 				</button>
 			</div>
 		</form>
-	{/if}
 
-	{#if $isAuthenticated}
 		{#if loading}
-			<div class="flex flex-col items-center justify-center gap-4 py-24">
-				<div
-					class="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"
-				></div>
-				<p class="animate-pulse text-sm text-neutral-500">Loading community feed...</p>
+			<div class="flex flex-col border-t border-white/10 pt-16">
+				{#each Array(3) as _, i (i)}
+					<div class="mb-16 space-y-4">
+						<div class="h-4 w-32 animate-pulse bg-white/5"></div>
+						<div class="h-6 w-3/4 animate-pulse bg-white/5"></div>
+						<div class="h-20 w-full animate-pulse bg-white/5"></div>
+					</div>
+				{/each}
 			</div>
 		{:else if filteredPosts.length === 0}
-			<div
-				class="rounded-3xl border border-dashed border-white/5 bg-neutral-900/30 py-32 text-center"
-			>
-				<p class="text-neutral-500">
-					No posts in <span class="font-bold text-indigo-400">{activeCategory}</span> yet.
+			<div class="border-t border-white/10 pt-16 text-center">
+				<p class="text-sm font-light text-neutral-600 italic">
+					No posts found in {activeCategory}.
 				</p>
 			</div>
 		{:else}
-			<div class="space-y-8">
+			<div class="flex flex-col border-t border-white/10 pt-12">
 				{#each filteredPosts as post, i (post.id)}
-					<div
+					<article
 						in:fly={{ y: 20, duration: 400, delay: i * 50 }}
-						class="group rounded-3xl border border-white/5 bg-neutral-900/50 p-8 transition-all hover:border-white/10 hover:shadow-2xl hover:shadow-indigo-500/5"
+						class="group mb-16 border-b border-white/5 pb-16 last:mb-0 last:border-0 last:pb-0"
 					>
-						<div class="mb-6 flex items-start justify-between">
-							<div class="flex items-center gap-4">
+						<div class="mb-8 flex items-start justify-between">
+							<div class="flex items-center gap-6">
 								<div
-									class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-white/5 bg-neutral-800 font-bold text-white"
+									class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-sm font-light text-neutral-400"
 								>
 									{#if post.author?.profilePic}
 										<img
 											src={post.author.profilePic}
 											alt={post.author.name}
-											class="h-full w-full object-cover"
+											class="h-full w-full rounded-full object-cover"
 										/>
 									{:else}
 										{post.author?.name?.charAt(0) || 'U'}
 									{/if}
 								</div>
 								<div>
-									<div class="flex items-center gap-2">
-										<span class="font-bold text-white">{post.author?.name || 'Anonymous'}</span>
+									<div class="flex items-center gap-3">
+										<span class="text-base font-medium text-white"
+											>{post.author?.name || 'Anonymous'}</span
+										>
 										{#if post.author?.isExpert}
 											<span
-												class="flex items-center gap-1 rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[9px] font-black text-blue-400 uppercase"
+												class="bg-white px-1.5 py-0.5 text-[9px] font-bold tracking-widest text-black uppercase"
+												>Expert</span
 											>
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													width="10"
-													height="10"
-													viewBox="0 0 24 24"
-													fill="none"
-													stroke="currentColor"
-													stroke-width="3"
-													stroke-linecap="round"
-													stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
-												>
-												Verified Expert
-											</span>
 										{/if}
 									</div>
-									<p class="text-[11px] text-neutral-500">
-										{new Date(post.createdAt).toLocaleDateString()} •
-										<span class="font-medium text-indigo-400"
-											>{post.author?.industry || 'General'}</span
+									<p class="mt-1 text-sm text-neutral-500">
+										{post.author?.industry || 'General'} •
+										<span class="text-[10px] font-bold tracking-widest uppercase"
+											>{new Date(post.createdAt).toLocaleDateString()}</span
 										>
 									</p>
 								</div>
 							</div>
+
 							{#if $user?.id === post.authorId || $user?.id === post.author?.id || $user?.role === 'ADMIN' || $user?.role === 'SUPERADMIN'}
 								<button
 									onclick={() => handleDelete(post.id)}
-									class="rounded-xl p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-500"
+									class="text-xs font-bold tracking-widest text-neutral-600 uppercase transition-colors hover:text-red-400"
 								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="18"
-										height="18"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
-											d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
-										/></svg
-									>
+									Delete
 								</button>
 							{/if}
 						</div>
 
-						<div class="mb-6">
+						<div class="mb-8 sm:ml-[4.5rem]">
 							<span
-								class="mb-3 inline-block rounded-md border border-white/5 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-neutral-400 uppercase"
+								class="mb-4 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
 								>{post.category}</span
 							>
 							<h3
-								class="mb-3 text-2xl font-bold text-white transition-colors group-hover:text-indigo-400"
+								class="mb-4 text-2xl font-medium text-white transition-colors group-hover:text-indigo-400"
 							>
 								{post.title}
 							</h3>
-							<p class="leading-relaxed whitespace-pre-line text-neutral-400">{post.content}</p>
+							<p class="text-base leading-relaxed font-light whitespace-pre-line text-neutral-400">
+								{post.content}
+							</p>
 						</div>
 
-						<!-- Interaction Area -->
-						<div class="mt-8 border-t border-white/5 pt-6">
-							<div class="mb-6 flex items-center gap-6">
-								<div class="flex items-center gap-2 text-xs text-neutral-400">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										><path
-											d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-										/></svg
-									>
-									{post.comments?.length || 0} Comments
-								</div>
+						<div class="sm:ml-[4.5rem]">
+							<div
+								class="mb-8 flex items-center gap-2 text-xs font-bold tracking-widest text-neutral-600 uppercase"
+							>
+								{post.comments?.length || 0} Comments
 							</div>
 
 							{#if post.comments && post.comments.length > 0}
-								<div class="mb-6 space-y-1">
+								<div class="mb-8 space-y-2">
 									{#each post.comments as comment (comment.id)}
 										{@render commentSnippet(comment)}
 									{/each}
 								</div>
 							{/if}
 
-							<!-- Add Comment Input -->
-							<div class="flex gap-3">
+							<div class="flex items-start gap-4">
 								<div
-									class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-800 text-[10px] font-bold text-white"
+									class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-light text-neutral-400"
 								>
 									{#if $user?.profilePic}
 										<img
 											src={$user.profilePic}
 											alt={$user.name}
-											class="h-full w-full object-cover"
+											class="h-full w-full rounded-full object-cover"
 										/>
 									{:else}
 										{$user?.name?.charAt(0) || 'U'}
 									{/if}
 								</div>
-								<div class="flex flex-grow gap-2">
+								<div class="flex flex-grow flex-col gap-3 sm:flex-row sm:items-center">
 									<input
 										type="text"
 										bind:value={commentText[post.id]}
 										placeholder="Write a comment..."
-										class="flex-grow rounded-xl border border-white/5 bg-neutral-950 px-4 py-2 text-sm text-white transition-all focus:border-indigo-500 focus:outline-none"
+										class="w-full border-b border-white/10 bg-transparent py-2 text-sm font-light text-white transition-colors focus:border-white focus:outline-none"
 										onkeydown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
 									/>
 									<button
 										onclick={() => handleAddComment(post.id)}
-										class="rounded-xl bg-indigo-500 p-2 text-white transition-all hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+										class="text-sm font-medium text-white underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
 										disabled={!commentText[post.id]}
 									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="16"
-											height="16"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											><line x1="22" y1="2" x2="11" y2="13" /><polyline
-												points="22 2 15 22 11 13 2 9 22 2"
-											/></svg
-										>
+										Post
 									</button>
 								</div>
 							</div>
 						</div>
-					</div>
+					</article>
 				{/each}
 			</div>
 		{/if}
 	{:else}
-		<div
-			class="rounded-3xl border border-white/5 bg-neutral-900/30 py-32 text-center backdrop-blur-sm"
-		>
-			<p class="mb-8 text-neutral-400">Please sign in to join the professional community.</p>
+		<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
+			<h2 class="mb-6 text-5xl font-light tracking-tight text-white">Knowledge Feed</h2>
+			<p class="mb-12 max-w-md text-lg leading-relaxed font-light text-neutral-500">
+				Sign in to access industry insights, mentorship advice, and campus updates.
+			</p>
 			<button
 				onclick={() => (window.location.href = '/login')}
-				class="rounded-full bg-white px-12 py-3 font-black text-black shadow-xl shadow-white/10 transition-all hover:bg-neutral-200"
+				class="bg-white px-10 py-4 text-sm font-medium text-black transition-transform hover:scale-105"
 			>
 				Sign In
 			</button>
