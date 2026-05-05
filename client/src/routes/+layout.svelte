@@ -2,8 +2,9 @@
 	import { onMount } from 'svelte';
 	import { spring } from 'svelte/motion';
 	import { page } from '$app/state';
-	import { fly } from 'svelte/transition';
-	import { initAuth, loading } from '$lib/authService';
+	import { fly, fade } from 'svelte/transition';
+	import { initAuth, loading, user } from '$lib/authService';
+	import { goto } from '$app/navigation';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import './layout.css';
 
@@ -21,6 +22,24 @@
 		coords.set({ x: e.clientX, y: e.clientY });
 	}
 
+	// Status Guard Logic
+	$effect(() => {
+		if (!$loading) {
+			const path = page.url.pathname;
+			const publicRoutes = ['/', '/login', '/pending', '/banned'];
+
+			if ($user) {
+				if ($user.isBanned && path !== '/banned') {
+					goto('/banned');
+				} else if ($user.status === 'PENDING' && !publicRoutes.includes(path)) {
+					goto('/pending');
+				} else if ($user.status === 'APPROVED' && path === '/pending') {
+					goto('/feed');
+				}
+			}
+		}
+	});
+
 	onMount(async () => {
 		await initAuth();
 	});
@@ -33,11 +52,33 @@
 <svelte:window onmousemove={handleMouseMove} />
 
 {#if $loading}
-	<div class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-neutral-950">
-		<img src="/logo.png?v=4" alt="AKN Logo" class="h-16 w-auto animate-pulse opacity-50 invert" />
-		<div
-			class="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-500"
-		></div>
+	<div
+		transition:fade={{ duration: 400 }}
+		class="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-neutral-950"
+	>
+		<div class="relative flex items-center justify-center">
+			<!-- Outer Glow -->
+			<div class="absolute h-32 w-32 animate-pulse rounded-full bg-indigo-500/10 blur-3xl"></div>
+			<!-- Logo -->
+			<img
+				src="/logo.png?v=4"
+				alt="AKN Logo"
+				class="relative h-20 w-auto animate-pulse invert brightness-200"
+			/>
+		</div>
+		<div class="mt-8 flex flex-col items-center gap-2">
+			<div class="flex gap-1">
+				{#each Array(3) as _, i}
+					<div
+						class="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-500"
+						style="animation-delay: {i * 0.1}s"
+					></div>
+				{/each}
+			</div>
+			<p class="text-[10px] font-black tracking-[0.2em] text-neutral-500 uppercase">
+				Initializing Network
+			</p>
+		</div>
 	</div>
 {:else}
 	<div class="relative flex min-h-screen flex-col bg-neutral-950">
@@ -59,7 +100,7 @@
 		</div>
 
 		<div class="relative z-10 flex min-h-screen flex-col">
-			{#if page.url.pathname !== '/banned'}
+			{#if page.url.pathname !== '/banned' && page.url.pathname !== '/pending' && page.url.pathname !== '/login'}
 				<Navbar />
 			{/if}
 			<main class="grid flex-grow">
