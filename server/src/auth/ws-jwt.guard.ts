@@ -5,6 +5,11 @@ import * as jwt from 'jsonwebtoken';
 import { JwksClient } from 'jwks-rsa';
 import { PrismaService } from '../prisma/prisma.service';
 
+interface JwtPayload {
+  sub: string;
+  [key: string]: any;
+}
+
 @Injectable()
 export class WsJwtGuard implements CanActivate {
   private jwksClient: JwksClient;
@@ -21,7 +26,8 @@ export class WsJwtGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
       const client: Socket = context.switchToWs().getClient();
-      const token = client.handshake.auth?.token;
+      const auth = client.handshake.auth as { token?: string } | undefined;
+      const token = auth?.token;
 
       if (!token) {
         throw new WsException('Unauthorized: No token provided');
@@ -29,10 +35,13 @@ export class WsJwtGuard implements CanActivate {
 
       const cleanToken = token.replace('Bearer ', '');
 
-      const payload: any = await new Promise((resolve, reject) => {
+      const payload = await new Promise<JwtPayload>((resolve, reject) => {
         jwt.verify(
           cleanToken,
           (header, callback) => {
+            if (!header.kid) {
+              return callback(new Error('No kid in JWT header'));
+            }
             this.jwksClient.getSigningKey(header.kid, (err, key) => {
               if (err) {
                 return callback(err);
@@ -47,10 +56,10 @@ export class WsJwtGuard implements CanActivate {
             algorithms: ['RS256'],
           },
           (err, decoded) => {
-            if (err) {
-              return reject(err);
+            if (err || !decoded || typeof decoded === 'string') {
+              return reject(err || new Error('Invalid token payload'));
             }
-            resolve(decoded);
+            resolve(decoded as JwtPayload);
           },
         );
       });
@@ -65,10 +74,11 @@ export class WsJwtGuard implements CanActivate {
         throw new WsException('Your account has been banned');
       }
 
-      client['user'] = payload;
+      // Attach user payload to client for further use
+      (client as any).user = payload;
       return true;
-    } catch (err) {
-      console.error('WsJwtGuard: Auth failed', err.message);
+    } catch (err: any) {
+      console.error('WsJwtGuard: Auth failed', err?.message || err);
       throw new WsException('Unauthorized');
     }
   }

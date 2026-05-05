@@ -33,10 +33,10 @@ async function request(path: string, method = 'GET', body?: any) {
 			window.location.href = '/banned';
 		}
 
-        const customError = new Error(errorMessage) as any;
-        customError.status = res.status;
-        customError.responseBody = errorBody;
-        customError.response = res;
+		const customError = new Error(errorMessage) as any;
+		customError.status = res.status;
+		customError.responseBody = errorBody;
+		customError.response = res;
 
 		throw customError;
 	}

@@ -66,11 +66,12 @@ export class MentorshipService {
 
     if (!request) throw new NotFoundException('Request not found');
 
-    const isEmailAdmin = userEmail && this.SUPERADMIN_EMAILS.includes(userEmail.toLowerCase());
+    const isEmailAdmin =
+      userEmail && this.SUPERADMIN_EMAILS.includes(userEmail.toLowerCase());
     const isRoleAdmin =
       userRole?.toUpperCase() === 'ADMIN' ||
       userRole?.toUpperCase() === 'SUPERADMIN';
-    
+
     const isAdmin = isEmailAdmin || isRoleAdmin;
     const isStudent = String(request.studentId) === String(userId);
     const isAlumni = String(request.alumniId) === String(userId);
