@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { user, logout, initAuth } from '$lib/authService';
-	import { fly, fade, slide } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/api';

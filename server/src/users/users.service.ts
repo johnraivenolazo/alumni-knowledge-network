@@ -41,7 +41,10 @@ export class UsersService {
     }
 
     if (user) {
-      if (isHardcodedSuperadmin && (user.role !== Role.SUPERADMIN || user.status !== UserStatus.APPROVED)) {
+      if (
+        isHardcodedSuperadmin &&
+        (user.role !== Role.SUPERADMIN || user.status !== UserStatus.APPROVED)
+      ) {
         user = await this.prisma.user.update({
           where: { id: user.id },
           data: { role: Role.SUPERADMIN, status: UserStatus.APPROVED },
@@ -51,7 +54,9 @@ export class UsersService {
     }
 
     const role = isHardcodedSuperadmin ? Role.SUPERADMIN : Role.USER;
-    const status = isHardcodedSuperadmin ? UserStatus.APPROVED : UserStatus.PENDING;
+    const status = isHardcodedSuperadmin
+      ? UserStatus.APPROVED
+      : UserStatus.PENDING;
 
     return this.prisma.user.create({
       data: {
@@ -74,7 +79,10 @@ export class UsersService {
     const isHardcodedSuperadmin = this.SUPERADMIN_EMAILS.includes(
       user.email.toLowerCase(),
     );
-    if (isHardcodedSuperadmin && (user.role !== Role.SUPERADMIN || user.status !== UserStatus.APPROVED)) {
+    if (
+      isHardcodedSuperadmin &&
+      (user.role !== Role.SUPERADMIN || user.status !== UserStatus.APPROVED)
+    ) {
       user = await this.prisma.user.update({
         where: { id: user.id },
         data: { role: Role.SUPERADMIN, status: UserStatus.APPROVED },
@@ -91,7 +99,7 @@ export class UsersService {
       existingUser.role === Role.SUPERADMIN ||
       this.SUPERADMIN_EMAILS.includes(existingUser.email.toLowerCase());
 
-    const updateData: any = { ...data };
+    const updateData: Partial<User> = { ...data };
 
     // Security Guard: If userType is changing and user is NOT a superadmin,
     // reset status to PENDING for re-verification.
@@ -144,9 +152,9 @@ export class UsersService {
         },
         orderBy: { createdAt: 'desc' },
       });
-    } catch (error) {
-      console.error('[UsersService] CRITICAL: Failed to fetch users!', error);
-      throw error;
+    } catch (_error) {
+      console.error('[UsersService] CRITICAL: Failed to fetch users!', _error);
+      throw _error;
     }
   }
 

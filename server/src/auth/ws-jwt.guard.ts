@@ -75,10 +75,13 @@ export class WsJwtGuard implements CanActivate {
       }
 
       // Attach user payload to client for further use
-      (client as any).user = payload;
+      (client as Socket & { user: JwtPayload }).user = payload;
       return true;
-    } catch (err: any) {
-      console.error('WsJwtGuard: Auth failed', err?.message || err);
+    } catch (err: unknown) {
+      console.error(
+        'WsJwtGuard: Auth failed',
+        (err as Error)?.message || String(err),
+      );
       throw new WsException('Unauthorized');
     }
   }

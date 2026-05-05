@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { Request } from 'express';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -37,8 +33,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(req: Request, payload: Record<string, any>) {
-    let email = (payload.email as string) || (payload['https://akn-api.com/email'] as string);
-    let name = (payload.name as string) || (payload['https://akn-api.com/name'] as string);
+    let email =
+      (payload.email as string) ||
+      (payload['https://akn-api.com/email'] as string);
+    let name =
+      (payload.name as string) ||
+      (payload['https://akn-api.com/name'] as string);
 
     // If Auth0 access token doesn't include email, fetch from /userinfo
     if (!email) {
@@ -52,9 +52,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             },
           );
           if (response.ok) {
-            const userInfo = await response.json();
+            const userInfo = (await response.json()) as {
+              email: string;
+              name?: string;
+              nickname?: string;
+            };
             email = userInfo.email;
-            name = userInfo.name || userInfo.nickname;
+            name = userInfo.name || userInfo.nickname || '';
           }
         } catch (e) {
           console.error('Failed to fetch userinfo from Auth0:', e);

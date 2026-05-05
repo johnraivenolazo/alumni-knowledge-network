@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { spring } from 'svelte/motion';
 	import { page } from '$app/state';
-	import { fly } from 'svelte/transition';
+	import { fly, fade } from 'svelte/transition';
 	import { initAuth, loading, user } from '$lib/authService';
 	import { goto } from '$app/navigation';
 	import Navbar from '$lib/components/Navbar.svelte';
@@ -58,19 +58,17 @@
 	>
 		<div class="relative flex items-center justify-center">
 			<!-- Outer Glow -->
-			<div
-				class="absolute h-32 w-32 animate-pulse rounded-full bg-indigo-500/10 blur-3xl"
-			></div>
+			<div class="absolute h-32 w-32 animate-pulse rounded-full bg-indigo-500/10 blur-3xl"></div>
 			<!-- Logo -->
 			<img
 				src="/logo.png?v=4"
 				alt="AKN Logo"
-				class="relative h-20 w-auto animate-pulse invert brightness-200"
+				class="relative h-20 w-auto animate-pulse brightness-200 invert"
 			/>
 		</div>
 		<div class="mt-8 flex flex-col items-center gap-2">
 			<div class="flex gap-1">
-				{#each Array(3) as _, i}
+				{#each Array(3) as _, i (i)}
 					<div
 						class="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-500"
 						style="animation-delay: {i * 0.1}s"

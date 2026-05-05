@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fly, slide, fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { api } from '$lib/api';
 	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
 	import { goto } from '$app/navigation';
@@ -114,7 +114,7 @@
 
 		<!-- Category Filter -->
 		<div class="scrollbar-hide flex gap-2 overflow-x-auto pb-2">
-			{#each categories as cat}
+			{#each categories as cat (cat)}
 				<button
 					onclick={() => (activeCategory = cat)}
 					class="rounded-full border px-4 py-1.5 text-xs font-bold transition-all
@@ -139,7 +139,7 @@
 					bind:value={newPost.category}
 					class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1 text-xs text-neutral-400 focus:border-indigo-500 focus:outline-none"
 				>
-					{#each categories.filter((c) => c !== 'All') as cat}
+					{#each categories.filter((c) => c !== 'All') as cat (cat)}
 						<option value={cat}>{cat}</option>
 					{/each}
 				</select>
@@ -312,7 +312,7 @@
 
 							{#if post.comments && post.comments.length > 0}
 								<div class="mb-6 space-y-1">
-									{#each post.comments as comment}
+									{#each post.comments as comment (comment.id)}
 										{@render commentSnippet(comment)}
 									{/each}
 								</div>
