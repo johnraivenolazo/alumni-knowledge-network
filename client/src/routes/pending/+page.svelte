@@ -147,7 +147,9 @@
 
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div class="space-y-2">
-						<label class="ml-1 text-[10px] font-black tracking-widest text-neutral-500 uppercase"
+						<label
+							for="industry"
+							class="ml-1 text-[10px] font-black tracking-widest text-neutral-500 uppercase"
 							>Industry / Course</label
 						>
 						<input
@@ -157,7 +159,9 @@
 						/>
 					</div>
 					<div class="space-y-2">
-						<label class="ml-1 text-[10px] font-black tracking-widest text-neutral-500 uppercase"
+						<label
+							for="batch"
+							class="ml-1 text-[10px] font-black tracking-widest text-neutral-500 uppercase"
 							>Batch / Year</label
 						>
 						<input
