@@ -4,7 +4,7 @@
 	import { api } from '$lib/api';
 	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
 	import { goto } from '$app/navigation';
-	import type { User, Role, SystemStats, UserStatus } from '$lib/types';
+	import type { User, SystemStats, UserStatus } from '$lib/types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let activeTab = $state<'overview' | 'pending' | 'users'>('overview');
@@ -13,6 +13,7 @@
 	let stats = $state<SystemStats | null>(null);
 	let loading = $state(true);
 	let error = $state('');
+	let editingUser = $state<User | null>(null);
 
 	async function loadData() {
 		if (!$isAuthenticated) return;
@@ -38,15 +39,6 @@
 	async function handleStatusChange(userId: string, status: UserStatus) {
 		try {
 			await api.patch(`/users/${userId}/status`, { status });
-			await loadData();
-		} catch (e: unknown) {
-			alert((e as Error).message);
-		}
-	}
-
-	async function handleRoleChange(userId: string, role: Role) {
-		try {
-			await api.patch(`/users/${userId}/role`, { role });
 			await loadData();
 		} catch (e: unknown) {
 			alert((e as Error).message);
@@ -475,48 +467,24 @@
 									<td class="px-8 py-4 text-right">
 										<div class="flex items-center justify-end gap-3">
 											{#if u.id !== $user?.id && u.role !== 'SUPERADMIN'}
-												{#if u.userType === 'ALUMNI'}
-													<button
-														onclick={async () => {
-															try {
-																await api.patch(`/users/${u.id}`, { isExpert: !u.isExpert });
-																await loadData();
-															} catch (e: any) {
-																alert(e.message);
-															}
-														}}
-														class="flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-black uppercase transition-all {u.isExpert
-															? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-															: 'bg-neutral-800 text-neutral-500 hover:bg-neutral-700'}"
-														title={u.isExpert ? 'Remove Expert Badge' : 'Mark as Expert'}
-													>
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															width="10"
-															height="10"
-															viewBox="0 0 24 24"
-															fill="none"
-															stroke="currentColor"
-															stroke-width="3"
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															><path
-																d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-															/></svg
-														>
-														{u.isExpert ? 'Expert' : 'Verify'}
-													</button>
-												{/if}
-												<select
-													value={u.role}
-													onchange={(e) =>
-														handleRoleChange(u.id, (e.target as HTMLSelectElement).value as Role)}
-													class="rounded-lg border border-white/10 bg-neutral-900 px-2 py-1 text-[10px] text-neutral-300 transition-all hover:border-neutral-700"
+												<button
+													onclick={() => (editingUser = { ...u })}
+													class="rounded-lg p-2 text-indigo-400 transition-all hover:bg-indigo-500/10"
+													title="Edit User"
 												>
-													<option value="USER">User</option>
-													<option value="ADMIN">Admin</option>
-													<option value="SUPERADMIN">Superadmin</option>
-												</select>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														width="16"
+														height="16"
+														viewBox="0 0 24 24"
+														fill="none"
+														stroke="currentColor"
+														stroke-width="2"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /></svg
+													>
+												</button>
 												<button
 													onclick={() => handleToggleBan(u.id, !u.isBanned)}
 													class="rounded-lg p-2 transition-all {u.isBanned
@@ -561,3 +529,147 @@
 		</div>
 	{/if}
 </div>
+
+{#if editingUser}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+		in:fade={{ duration: 150 }}
+		out:fade={{ duration: 150 }}
+	>
+		<div
+			class="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-neutral-900 shadow-2xl"
+			in:fly={{ y: 20, duration: 200 }}
+			out:fly={{ y: 20, duration: 200 }}
+		>
+			<div class="flex items-center justify-between border-b border-white/5 bg-white/5 px-6 py-4">
+				<h3 class="text-lg font-bold text-white">Edit User</h3>
+				<button
+					onclick={() => (editingUser = null)}
+					class="text-neutral-500 transition-colors hover:text-white"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"
+						></line></svg
+					>
+				</button>
+			</div>
+			<div class="space-y-6 p-6">
+				<!-- Read-only info -->
+				<div class="flex items-center gap-4">
+					<div
+						class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-800 font-bold text-white"
+					>
+						{#if editingUser.profilePic}
+							<img
+								src={editingUser.profilePic}
+								alt={editingUser.name}
+								class="h-full w-full object-cover"
+							/>
+						{:else}
+							{editingUser.name?.charAt(0) || 'U'}
+						{/if}
+					</div>
+					<div>
+						<p class="font-bold text-white">{editingUser.name || 'Anonymous'}</p>
+						<p class="text-xs text-neutral-500">{editingUser.email}</p>
+					</div>
+				</div>
+
+				<!-- Form Controls -->
+				<div class="space-y-4">
+					<div>
+						<label class="mb-1 block text-xs font-semibold text-neutral-400">User Type</label>
+						<select
+							bind:value={editingUser.userType}
+							class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+						>
+							<option value="STUDENT">Student</option>
+							<option value="ALUMNI">Alumni</option>
+						</select>
+					</div>
+
+					<div>
+						<label class="mb-1 block text-xs font-semibold text-neutral-400">Role</label>
+						<select
+							bind:value={editingUser.role}
+							class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+						>
+							<option value="USER">User</option>
+							<option value="ADMIN">Admin</option>
+							<option value="SUPERADMIN">Superadmin</option>
+						</select>
+					</div>
+
+					{#if editingUser.userType === 'ALUMNI'}
+						<div
+							class="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3"
+						>
+							<div>
+								<p class="text-sm font-semibold text-white">Expert Status</p>
+								<p class="text-[10px] text-neutral-500">Highlight this user as a platform expert</p>
+							</div>
+							<button
+								onclick={() => {
+									if (editingUser) editingUser.isExpert = !editingUser.isExpert;
+								}}
+								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {editingUser.isExpert
+									? 'bg-indigo-500'
+									: 'bg-neutral-700'}"
+							>
+								<span
+									class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {editingUser.isExpert
+										? 'translate-x-6'
+										: 'translate-x-1'}"
+								></span>
+							</button>
+						</div>
+					{/if}
+				</div>
+			</div>
+			<div class="flex justify-end gap-3 border-t border-white/5 bg-white/5 px-6 py-4">
+				<button
+					onclick={() => (editingUser = null)}
+					class="rounded-xl px-4 py-2 text-sm font-medium text-neutral-400 transition-colors hover:text-white"
+				>
+					Cancel
+				</button>
+				<button
+					onclick={async () => {
+						try {
+							// Save role first if changed
+							const originalUser = users.find((u) => u.id === editingUser?.id);
+							if (editingUser && originalUser && editingUser.role !== originalUser.role) {
+								await api.patch(`/users/${editingUser.id}/role`, { role: editingUser.role });
+							}
+
+							// Save userType and isExpert
+							if (editingUser) {
+								await api.patch(`/users/${editingUser.id}`, {
+									userType: editingUser.userType,
+									isExpert: editingUser.isExpert
+								});
+							}
+
+							await loadData();
+							editingUser = null;
+						} catch (e: any) {
+							alert(e.message);
+						}
+					}}
+					class="rounded-xl bg-indigo-500 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-600"
+				>
+					Save Changes
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

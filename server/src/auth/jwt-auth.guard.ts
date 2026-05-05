@@ -16,7 +16,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const isValid = await super.canActivate(context);
     if (!isValid) return false;
 
-    const request = context.switchToHttp().getRequest<{ user: { id: string } }>();
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user: { id: string } }>();
 
     // Direct DB check to avoid circular dependency with UsersService
     const user = await this.prisma.user.findUnique({

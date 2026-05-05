@@ -115,6 +115,13 @@ export class UsersService {
     });
   }
 
+  async adminUpdate(id: string, data: Partial<User>) {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
   async generatePresignedUrl(userId: string, fileName: string) {
     const bucketName = process.env.AWS_S3_BUCKET;
     const key = `profiles/${userId}/${Date.now()}-${fileName}`;

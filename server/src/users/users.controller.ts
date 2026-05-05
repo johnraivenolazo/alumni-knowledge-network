@@ -100,6 +100,17 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.SUPERADMIN)
+  @Patch(':id')
+  async adminUpdateUser(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') targetId: string,
+    @Body() body: { userType?: UserType; isExpert?: boolean },
+  ) {
+    return this.usersService.adminUpdate(targetId, body);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
   @Patch(':id/role')
   async changeRole(
     @Req() req: AuthenticatedRequest,
