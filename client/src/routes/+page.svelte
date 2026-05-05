@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { isAuthenticated } from '$lib/authService';
+	import { isAuthenticated, login } from '$lib/authService';
 	const title = 'Alumni Knowledge Network';
 </script>
 
@@ -30,12 +30,21 @@
 					professional networks through the SECI model.
 				</p>
 				<div class="mt-10 flex items-center justify-center gap-x-6">
-					<a
-						href={$isAuthenticated ? `${base}/feed` : `${base}/login`}
-						class="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black shadow-sm transition-all hover:bg-neutral-200 active:scale-95"
-					>
-						{$isAuthenticated ? 'Enter Network' : 'Get Started'}
-					</a>
+					{#if $isAuthenticated}
+						<a
+							href={`${base}/feed`}
+							class="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black shadow-sm transition-all hover:bg-neutral-200 active:scale-95"
+						>
+							Enter Network
+						</a>
+					{:else}
+						<button
+							onclick={login}
+							class="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black shadow-sm transition-all hover:bg-neutral-200 active:scale-95"
+						>
+							Get Started
+						</button>
+					{/if}
 					<a
 						href="#about"
 						class="text-sm leading-6 font-semibold text-white transition-colors hover:text-neutral-300"
