@@ -12,6 +12,7 @@
 	let error = $state('');
 	let activeCategory = $state('All');
 	let commentText = $state<Record<string, string>>({});
+	let isComposing = $state(false);
 
 	const categories = ['All', 'General', 'Tech', 'Career', 'Mentorship', 'Events'];
 
@@ -33,6 +34,7 @@
 			const created = await api.post('/posts', newPost);
 			posts = [created, ...posts];
 			newPost = { title: '', content: '', category: 'General' };
+			isComposing = false;
 		} catch (e: unknown) {
 			error = (e as Error).message;
 		}
@@ -128,46 +130,82 @@
 			</div>
 		</header>
 
-		<form onsubmit={handleSubmit} class="mb-20 space-y-6">
-			<div class="flex items-center justify-between">
-				<h2 class="text-xs font-bold tracking-widest text-neutral-500 uppercase">
-					Share Expertise
-				</h2>
-				<select
-					bind:value={newPost.category}
-					class="bg-transparent text-xs font-bold tracking-widest text-neutral-500 uppercase outline-none focus:text-white"
-				>
-					{#each categories.filter((c) => c !== 'All') as cat (cat)}
-						<option value={cat} class="bg-neutral-900">{cat}</option>
-					{/each}
-				</select>
-			</div>
-
-			<input
-				bind:value={newPost.title}
-				placeholder="Topic Title"
-				class="w-full border-b border-white/10 bg-transparent py-4 text-xl font-light text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
-			/>
-
-			<textarea
-				bind:value={newPost.content}
-				placeholder="What insights do you want to share with the community?"
-				rows="3"
-				class="w-full resize-none border-b border-white/10 bg-transparent py-4 text-sm leading-relaxed font-light text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
-			></textarea>
-
-			{#if error}
-				<p class="text-xs text-red-400">{error}</p>
-			{/if}
-
-			<div class="flex justify-end pt-4">
+		<form onsubmit={handleSubmit} class="mb-24 space-y-6">
+			{#if !isComposing}
 				<button
-					type="submit"
-					class="text-sm font-medium text-white underline-offset-4 hover:underline"
+					type="button"
+					onclick={() => (isComposing = true)}
+					class="w-full border-b border-white/5 bg-transparent py-4 text-left text-xl font-light text-neutral-500 transition-colors hover:border-white/20 hover:text-neutral-400"
 				>
-					Publish Post
+					Share your expertise with the network...
 				</button>
-			</div>
+			{:else}
+				<div transition:fly={{ y: 20, duration: 300 }}>
+					<div class="flex items-center justify-between">
+						<h2 class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
+							Share Expertise
+						</h2>
+						<div class="relative">
+							<select
+								bind:value={newPost.category}
+								class="appearance-none bg-transparent pr-4 text-[10px] font-bold tracking-widest text-neutral-500 uppercase transition-colors outline-none focus:text-white"
+							>
+								{#each categories.filter((c) => c !== 'All') as cat (cat)}
+									<option value={cat} class="bg-neutral-900">{cat}</option>
+								{/each}
+							</select>
+							<div
+								class="pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 text-neutral-600"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="10"
+									height="10"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="3"
+									stroke-linecap="round"
+									stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
+								>
+							</div>
+						</div>
+					</div>
+
+					<input
+						bind:value={newPost.title}
+						placeholder="Topic Title"
+						class="mt-4 w-full border-b border-white/10 bg-transparent py-4 text-xl font-light text-white placeholder-neutral-700 transition-colors focus:border-white focus:outline-none"
+					/>
+
+					<textarea
+						bind:value={newPost.content}
+						placeholder="What insights do you want to share with the community?"
+						rows="4"
+						class="w-full resize-none bg-transparent py-6 text-sm leading-relaxed font-light text-neutral-300 placeholder-neutral-700 focus:outline-none"
+					></textarea>
+
+					{#if error}
+						<p class="text-[10px] font-bold tracking-widest text-red-500 uppercase">{error}</p>
+					{/if}
+
+					<div class="flex items-center justify-end gap-6 border-t border-white/5 pt-6">
+						<button
+							type="button"
+							onclick={() => (isComposing = false)}
+							class="text-[10px] font-bold tracking-widest text-neutral-600 uppercase transition-colors hover:text-white"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="text-[10px] font-bold tracking-widest text-white uppercase underline underline-offset-8 hover:text-neutral-300"
+						>
+							Publish Post
+						</button>
+					</div>
+				</div>
+			{/if}
 		</form>
 
 		{#if loading}
