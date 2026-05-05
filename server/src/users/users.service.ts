@@ -13,6 +13,9 @@ export class UsersService {
   private readonly SUPERADMIN_EMAILS = [
     'jcesperanza@neu.edu.ph',
     'johnraivenolazo@gmail.com',
+    'bgduque@neu.edu.ph',
+    'olazoraiven@gmail.com',
+    'raivenolazo@gmail.com',
   ];
   private s3Client: S3Client;
 
@@ -106,19 +109,24 @@ export class UsersService {
     batch?: string;
     search?: string;
   }) {
-    return this.prisma.user.findMany({
-      where: {
-        industry: filters?.industry ? filters.industry : undefined,
-        batch: filters?.batch ? filters.batch : undefined,
-        OR: filters?.search
-          ? [
-              { name: { contains: filters.search, mode: 'insensitive' } },
-              { bio: { contains: filters.search, mode: 'insensitive' } },
-            ]
-          : undefined,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    try {
+      return this.prisma.user.findMany({
+        where: {
+          industry: filters?.industry ? filters.industry : undefined,
+          batch: filters?.batch ? filters.batch : undefined,
+          OR: filters?.search
+            ? [
+                { name: { contains: filters.search, mode: 'insensitive' } },
+                { bio: { contains: filters.search, mode: 'insensitive' } },
+              ]
+            : undefined,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (error) {
+      console.error('[UsersService] CRITICAL: Failed to fetch users!', error);
+      throw error;
+    }
   }
 
   async changeRole(userId: string, role: Role) {
