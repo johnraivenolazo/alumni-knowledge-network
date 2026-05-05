@@ -156,7 +156,8 @@
 					>
 					<h2 class="mb-2 text-xl font-medium text-white">Application in Review</h2>
 					<p class="mb-8 max-w-sm text-sm leading-relaxed font-light text-neutral-500">
-						You'll receive an email notification once your account is verified by an administrator.
+						Please check back later. You will be able to access the platform once an administrator
+						verifies your account.
 					</p>
 					<button
 						onclick={() => (isEditing = true)}
