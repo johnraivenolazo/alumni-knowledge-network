@@ -86,9 +86,24 @@ export class UsersService {
   }
 
   async update(id: string, data: Partial<User>) {
+    const existingUser = await this.findOne(id);
+    const isSuperadmin =
+      existingUser.role === Role.SUPERADMIN ||
+      this.SUPERADMIN_EMAILS.includes(existingUser.email.toLowerCase());
+
+    const updateData: any = { ...data };
+
+    // Security Guard: If userType is changing and user is NOT a superadmin,
+    // reset status to PENDING for re-verification.
+    if (data.userType && data.userType !== existingUser.userType) {
+      if (!isSuperadmin) {
+        updateData.status = UserStatus.PENDING;
+      }
+    }
+
     return this.prisma.user.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 
