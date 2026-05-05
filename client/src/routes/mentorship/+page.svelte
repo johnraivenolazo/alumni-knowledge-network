@@ -62,8 +62,8 @@
 			await loadData();
 		} catch (e: any) {
 			console.error('[MentorshipDebug] Error Object:', e);
-			if (e.response) {
-				console.error('[MentorshipDebug] Server Response Body:', await e.response.json());
+			if (e.responseBody) {
+				console.error('[MentorshipDebug] Server Response Reason:', e.responseBody);
 			}
             await loadData(); // Revert if failed
 		}
