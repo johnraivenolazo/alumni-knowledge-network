@@ -115,43 +115,24 @@
 							>
 								<div class="mb-2 border-b border-neutral-800 px-4 py-3">
 									<div class="mb-1 flex items-center justify-between">
-										<p class="text-xs font-medium text-neutral-500">Logged in as</p>
+										<p class="text-[10px] font-bold tracking-widest text-neutral-600 uppercase">
+											Authenticated
+										</p>
 										<span
-											class="rounded-full px-2 py-0.5 text-[9px] font-bold tracking-tighter uppercase
-											{$user?.role === 'SUPERADMIN'
-												? 'border border-purple-500/20 bg-purple-500/10 text-purple-400'
-												: $user?.role === 'ADMIN'
-													? 'border border-indigo-500/20 bg-indigo-500/10 text-indigo-400'
-													: 'border border-neutral-700 bg-neutral-800 text-neutral-400'}"
+											class="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[9px] font-bold tracking-widest text-neutral-400 uppercase"
 										>
-											{$user?.role === 'SUPERADMIN' ? 'SUPERADMIN' : $user?.role || 'User'}
+											{$user?.role || 'User'}
 										</span>
 									</div>
-									<p class="truncate text-sm font-bold text-white">{$user?.email}</p>
+									<p class="truncate text-sm font-medium text-white">{$user?.email}</p>
 								</div>
 
 								<div class="space-y-1">
 									<a
 										href="{base}/profile/me"
 										onclick={closeMenu}
-										class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-neutral-400 transition-all hover:bg-neutral-800 hover:text-white"
+										class="flex items-center rounded-xl px-4 py-2.5 text-xs font-bold tracking-widest text-neutral-500 uppercase transition-all hover:bg-neutral-800 hover:text-white"
 									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="18"
-											height="18"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle
-												cx="12"
-												cy="7"
-												r="4"
-											/></svg
-										>
 										My Profile
 									</a>
 
@@ -159,22 +140,8 @@
 										<a
 											href="{base}/admin"
 											onclick={closeMenu}
-											class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-indigo-400 transition-all hover:bg-indigo-500/10 hover:text-indigo-300"
+											class="flex items-center rounded-xl px-4 py-2.5 text-xs font-bold tracking-widest text-neutral-500 uppercase transition-all hover:bg-white/5 hover:text-white"
 										>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="18"
-												height="18"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												stroke-width="2"
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M9 3v18" /><path
-													d="m14 8 2 2-2 2"
-												/></svg
-											>
 											Admin Dashboard
 										</a>
 									{/if}
@@ -184,22 +151,8 @@
 											logout();
 											closeMenu();
 										}}
-										class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-red-400/70 transition-all hover:bg-red-500/10 hover:text-red-400"
+										class="flex w-full items-center rounded-xl px-4 py-2.5 text-xs font-bold tracking-widest text-neutral-600 uppercase transition-all hover:bg-red-500/10 hover:text-red-400"
 									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="18"
-											height="18"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline
-												points="16 17 21 12 16 7"
-											/><line x1="21" x2="9" y1="12" y2="12" /></svg
-										>
 										Sign out
 									</button>
 								</div>

@@ -79,27 +79,9 @@
 
 <div class="mx-auto max-w-7xl px-4 py-12">
 	<div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-		<div in:fly={{ y: -20, duration: 600 }}>
-			<div class="mb-2 flex items-center gap-4">
-				<div class="rounded-xl bg-indigo-500/10 p-2 text-indigo-400">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><path d="M12 20h9" /><path
-							d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
-						/></svg
-					>
-				</div>
-				<h1 class="text-3xl font-bold tracking-tight text-white">Network Administration</h1>
-			</div>
-			<p class="text-neutral-500">
+		<div>
+			<h1 class="text-3xl font-bold tracking-tight text-white italic">Network Administration</h1>
+			<p class="mt-2 font-light text-neutral-500">
 				Monitor platform growth, verify members, and manage community standards.
 			</p>
 		</div>
@@ -175,42 +157,46 @@
 					{/each}
 				{:else}
 					<div
-						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-indigo-500/30"
+						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-white/20"
 					>
 						<p class="text-xs font-semibold tracking-widest text-neutral-500 uppercase">
 							Total Members
 						</p>
-						<p class="mt-2 text-4xl font-bold text-white">{stats?.totalUsers || 0}</p>
+						<p class="mt-2 text-4xl font-bold tracking-tighter text-white">
+							{stats?.totalUsers || 0}
+						</p>
 						<div class="mt-4 h-1 w-full rounded-full bg-neutral-800">
-							<div class="h-full rounded-full bg-indigo-500" style="width: 100%"></div>
+							<div class="h-full rounded-full bg-white/20" style="width: 100%"></div>
 						</div>
 					</div>
 					<div
-						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-blue-500/30"
+						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-white/20"
 					>
 						<p class="text-xs font-semibold tracking-widest text-neutral-500 uppercase">Students</p>
-						<p class="mt-2 text-4xl font-bold text-blue-400">{stats?.students || 0}</p>
-						<p class="mt-2 text-xs text-neutral-500">
+						<p class="mt-2 text-4xl font-bold tracking-tighter text-white">
+							{stats?.students || 0}
+						</p>
+						<p class="mt-2 text-xs font-light text-neutral-500">
 							{(((stats?.students || 0) / (stats?.totalUsers || 1)) * 100).toFixed(1)}% of network
 						</p>
 					</div>
 					<div
-						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-emerald-500/30"
+						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-white/20"
 					>
 						<p class="text-xs font-semibold tracking-widest text-neutral-500 uppercase">Alumni</p>
-						<p class="mt-2 text-4xl font-bold text-emerald-400">{stats?.alumni || 0}</p>
-						<p class="mt-2 text-xs text-neutral-500">
+						<p class="mt-2 text-4xl font-bold tracking-tighter text-white">{stats?.alumni || 0}</p>
+						<p class="mt-2 text-xs font-light text-neutral-500">
 							{(((stats?.alumni || 0) / (stats?.totalUsers || 1)) * 100).toFixed(1)}% of network
 						</p>
 					</div>
 					<div
-						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-amber-500/30"
+						class="group rounded-2xl border border-white/5 bg-neutral-900/50 p-6 transition-all hover:border-white/20"
 					>
 						<p class="text-xs font-semibold tracking-widest text-neutral-500 uppercase">
 							Pending Approval
 						</p>
-						<p class="mt-2 text-4xl font-bold text-amber-500">{stats?.pending || 0}</p>
-						<p class="mt-2 text-xs text-neutral-500">Requires action</p>
+						<p class="mt-2 text-4xl font-bold tracking-tighter text-white">{stats?.pending || 0}</p>
+						<p class="mt-2 text-xs font-light text-neutral-500 italic">Requires action</p>
 					</div>
 				{/if}
 			</div>
@@ -252,7 +238,7 @@
 										</div>
 										<div class="h-2 w-full overflow-hidden rounded-full bg-neutral-800">
 											<div
-												class="h-full bg-gradient-to-r from-indigo-500 to-blue-500"
+												class="h-full bg-white/20"
 												style="width: {(item._count._all / (stats.totalUsers || 1)) * 100}%"
 											></div>
 										</div>
@@ -263,27 +249,16 @@
 								class="flex flex-col items-center justify-center border-l border-white/5 p-8 text-center"
 							>
 								<div
-									class="relative flex h-48 w-48 items-center justify-center rounded-full border-8 border-indigo-500/10"
+									class="relative flex h-48 w-48 items-center justify-center rounded-full border border-white/5"
 								>
 									<div class="text-center">
-										<p class="text-3xl font-black text-white">{stats.totalUsers}</p>
+										<p class="text-4xl font-black tracking-tighter text-white">
+											{stats.totalUsers}
+										</p>
 										<p class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
-											Total
+											Network Size
 										</p>
 									</div>
-									<!-- Creative SVG Chart Decoration -->
-									<svg class="absolute -inset-2 h-[calc(100%+16px)] w-[calc(100%+16px)] -rotate-90">
-										<circle
-											cx="50%"
-											cy="50%"
-											r="48%"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="8"
-											class="text-indigo-500/40"
-											stroke-dasharray="300 100"
-										/>
-									</svg>
 								</div>
 								<p class="mt-8 max-w-xs text-xs text-neutral-500">
 									Live metrics reflect current verified membership status.
@@ -442,24 +417,17 @@
 									</td>
 									<td class="px-8 py-4">
 										<span
-											class="rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase {u.status ===
+											class="rounded border px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase {u.status ===
 											'APPROVED'
-												? 'bg-emerald-500/10 text-emerald-500'
-												: u.status === 'PENDING'
-													? 'bg-amber-500/10 text-amber-500'
-													: 'bg-red-500/10 text-red-500'}"
+												? 'border-white/10 bg-white/5 text-neutral-400'
+												: 'border-white/10 bg-white/5 text-neutral-500 italic'}"
 										>
 											{u.status}
 										</span>
 									</td>
 									<td class="px-8 py-4">
 										<span
-											class="rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase {u.role ===
-											'SUPERADMIN'
-												? 'bg-purple-500 text-white'
-												: u.role === 'ADMIN'
-													? 'bg-indigo-500 text-white'
-													: 'bg-neutral-800 text-neutral-400'}"
+											class="rounded border border-white/5 bg-white/5 px-2 py-0.5 text-[9px] font-bold tracking-widest text-neutral-500 uppercase"
 										>
 											{u.role}
 										</span>
@@ -488,8 +456,8 @@
 												<button
 													onclick={() => handleToggleBan(u.id, !u.isBanned)}
 													class="rounded-lg p-2 transition-all {u.isBanned
-														? 'text-emerald-400'
-														: 'text-orange-400 hover:bg-orange-500/10'}"
+														? 'text-white'
+														: 'text-neutral-600 hover:text-white'}"
 													title={u.isBanned ? 'Unban' : 'Ban'}
 												>
 													<svg
@@ -585,60 +553,102 @@
 				</div>
 
 				<!-- Form Controls -->
-				<div class="space-y-4">
+				<div class="space-y-6">
 					<div>
-						<label class="mb-1 block text-xs font-semibold text-neutral-400">User Type</label>
-						<select
-							bind:value={editingUser.userType}
-							class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+						<label
+							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+							>User Type</label
 						>
-							<option value="STUDENT">Student</option>
-							<option value="ALUMNI">Alumni</option>
-						</select>
+						<div class="relative">
+							<select
+								bind:value={editingUser.userType}
+								class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
+							>
+								<option value="STUDENT">Student</option>
+								<option value="ALUMNI">Alumni</option>
+							</select>
+							<div
+								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-neutral-600"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="3"
+									stroke-linecap="round"
+									stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
+								>
+							</div>
+						</div>
 					</div>
 
 					<div>
-						<label class="mb-1 block text-xs font-semibold text-neutral-400">Role</label>
-						<select
-							bind:value={editingUser.role}
-							class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+						<label
+							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+							>System Role</label
 						>
-							<option value="USER">User</option>
-							<option value="ADMIN">Admin</option>
-							<option value="SUPERADMIN">Superadmin</option>
-						</select>
+						<div class="relative">
+							<select
+								bind:value={editingUser.role}
+								class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
+							>
+								<option value="USER">User</option>
+								<option value="ADMIN">Admin</option>
+								<option value="SUPERADMIN">Superadmin</option>
+							</select>
+							<div
+								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-neutral-600"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="3"
+									stroke-linecap="round"
+									stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
+								>
+							</div>
+						</div>
 					</div>
 
 					{#if editingUser.userType === 'ALUMNI'}
 						<div
-							class="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3"
+							class="flex items-center justify-between rounded-xl border border-white/5 bg-neutral-900 px-4 py-4"
 						>
 							<div>
-								<p class="text-sm font-semibold text-white">Expert Status</p>
-								<p class="text-[10px] text-neutral-500">Highlight this user as a platform expert</p>
+								<p class="text-[10px] font-bold tracking-widest text-white uppercase">
+									Expert Status
+								</p>
+								<p class="text-[10px] font-light text-neutral-500">Highlight as platform expert</p>
 							</div>
 							<button
 								onclick={() => {
 									if (editingUser) editingUser.isExpert = !editingUser.isExpert;
 								}}
-								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {editingUser.isExpert
-									? 'bg-indigo-500'
-									: 'bg-neutral-700'}"
+								class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors {editingUser.isExpert
+									? 'bg-white'
+									: 'bg-neutral-800'}"
 							>
 								<span
-									class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {editingUser.isExpert
-										? 'translate-x-6'
-										: 'translate-x-1'}"
+									class="inline-block h-3 w-3 transform rounded-full transition-transform {editingUser.isExpert
+										? 'translate-x-5 bg-black'
+										: 'translate-x-1 bg-neutral-500'}"
 								></span>
 							</button>
 						</div>
 					{/if}
 				</div>
 			</div>
-			<div class="flex justify-end gap-3 border-t border-white/5 bg-white/5 px-6 py-4">
+			<div class="flex justify-end gap-6 border-t border-white/5 bg-neutral-950/50 px-8 py-6">
 				<button
 					onclick={() => (editingUser = null)}
-					class="rounded-xl px-4 py-2 text-sm font-medium text-neutral-400 transition-colors hover:text-white"
+					class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase transition-colors hover:text-white"
 				>
 					Cancel
 				</button>
@@ -665,7 +675,7 @@
 							alert(e.message);
 						}
 					}}
-					class="rounded-xl bg-indigo-500 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-600"
+					class="rounded-lg bg-white px-8 py-3 text-[10px] font-bold tracking-widest text-black uppercase transition-all hover:bg-neutral-200 active:scale-95"
 				>
 					Save Changes
 				</button>
