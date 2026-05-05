@@ -45,6 +45,7 @@ export class MentorshipController {
       body.status,
       req.user.id,
       req.user.role,
+      req.user.email,
     );
   }
 
