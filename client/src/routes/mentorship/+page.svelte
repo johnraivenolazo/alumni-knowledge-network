@@ -42,11 +42,22 @@
 	}
 
 	async function handleResponse(id: string, status: string) {
+		console.log('[MentorshipDebug] Handling Response:', {
+			requestId: id,
+			requestedStatus: status,
+			currentUser: $user?.id,
+			currentRole: $user?.role,
+			currentEmail: $user?.email
+		});
 		try {
 			await api.patch(`/mentorship/${id}/respond`, { status });
+			console.log('[MentorshipDebug] Success!');
 			await loadData();
-		} catch (e) {
-			console.error(e);
+		} catch (e: any) {
+			console.error('[MentorshipDebug] Error Object:', e);
+			if (e.response) {
+				console.error('[MentorshipDebug] Server Response Body:', await e.response.json());
+			}
 		}
 	}
 
