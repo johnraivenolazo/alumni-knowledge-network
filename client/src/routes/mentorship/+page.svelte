@@ -229,6 +229,12 @@
 					{isAlumni ? 'Network Directory' : 'Discover Mentors'}
 				</h2>
 
+				{#if isAlumni}
+					<p in:fade class="mb-6 text-[11px] font-light text-neutral-500 italic">
+						Your profile is currently live and visible to students in this directory.
+					</p>
+				{/if}
+
 				<!-- Filters -->
 				<div class="mb-12 flex flex-col gap-6 sm:flex-row">
 					<div class="relative w-full">
