@@ -8,8 +8,14 @@
 	let { requestId, receiverId, partnerName, initialMessages = [], onRemove } = $props();
 
 	let socket: Socket;
-	let messages = $state<Message[]>(initialMessages);
+	let messages = $state<Message[]>([]);
 	let newMessage = $state('');
+
+	$effect(() => {
+		if (messages.length === 0 && initialMessages.length > 0) {
+			messages = initialMessages;
+		}
+	});
 	let chatContainer = $state<HTMLElement | null>(null);
 	let isConnected = $state(false);
 
