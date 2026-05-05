@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: ap-southeast-2
-  ECR_REPOSITORY: akn-server-777b
+  ECR_REPOSITORY: akn-server
   ECS_SERVICE: akn-server-777b
   ECS_CLUSTER: default
   CONTAINER_NAME: akn-server-777b
