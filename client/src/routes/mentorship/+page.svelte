@@ -45,15 +45,26 @@
 		}
 	}
 
-	async function handleResponse(id: string, status: string | any) {
+	async function handleResponse(id: string, status: string) {
+		console.log('[MentorshipDebug] Handling Response:', {
+			requestId: id,
+			requestedStatus: status,
+			currentUser: $user?.id,
+			currentRole: $user?.role,
+			currentEmail: $user?.email
+		});
 		try {
             // Optimistic Update: Update the local state immediately
             requests = requests.map((r) => (r.id === id ? { ...r, status } : r));
             
 			await api.patch(`/mentorship/${id}/respond`, { status });
+			console.log('[MentorshipDebug] Success!');
 			await loadData();
-		} catch (e) {
-			console.error(e);
+		} catch (e: any) {
+			console.error('[MentorshipDebug] Error Object:', e);
+			if (e.response) {
+				console.error('[MentorshipDebug] Server Response Body:', await e.response.json());
+			}
             await loadData(); // Revert if failed
 		}
 	}
@@ -369,8 +380,7 @@
 							cx="9"
 							cy="7"
 							r="4"
-						/><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg
-					>
+						/><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg>
 				</div>
 				<h2 class="text-3xl font-black tracking-tighter text-white">Mentorship Request</h2>
 				<p class="mt-2 text-neutral-500">

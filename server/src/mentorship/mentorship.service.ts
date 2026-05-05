@@ -89,13 +89,15 @@ export class MentorshipService {
 
     if (status === RequestStatus.CANCELLED) {
       if (!isStudent && !isAlumni && !isAdmin) {
-        console.error('[MentorshipAuth] Forbidden: Not authorized to cancel');
-        throw new ForbiddenException('Unauthorized');
+        const reason = `Unauthorized: Not student(${isStudent}), alumni(${isAlumni}), or admin(${isAdmin}). User: ${userId}, Role: ${userRole}, Email: ${userEmail}`;
+        console.error('[MentorshipAuth] Forbidden:', reason);
+        throw new ForbiddenException(reason);
       }
     } else {
       if (!isAlumni && !isAdmin) {
-        console.error('[MentorshipAuth] Forbidden: Not authorized to respond');
-        throw new ForbiddenException('Unauthorized');
+        const reason = `Unauthorized: Not alumni(${isAlumni}) or admin(${isAdmin}). User: ${userId}, Role: ${userRole}, Email: ${userEmail}`;
+        console.error('[MentorshipAuth] Forbidden:', reason);
+        throw new ForbiddenException(reason);
       }
     }
 
