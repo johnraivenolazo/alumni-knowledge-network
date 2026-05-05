@@ -41,7 +41,7 @@ export class UsersService {
     }
 
     if (user) {
-      if (isHardcodedSuperadmin && user.role !== Role.SUPERADMIN) {
+      if (isHardcodedSuperadmin && (user.role !== Role.SUPERADMIN || user.status !== UserStatus.APPROVED)) {
         user = await this.prisma.user.update({
           where: { id: user.id },
           data: { role: Role.SUPERADMIN, status: UserStatus.APPROVED },
@@ -51,9 +51,7 @@ export class UsersService {
     }
 
     const role = isHardcodedSuperadmin ? Role.SUPERADMIN : Role.USER;
-    const status = isHardcodedSuperadmin
-      ? UserStatus.APPROVED
-      : UserStatus.PENDING;
+    const status = isHardcodedSuperadmin ? UserStatus.APPROVED : UserStatus.PENDING;
 
     return this.prisma.user.create({
       data: {
@@ -76,7 +74,7 @@ export class UsersService {
     const isHardcodedSuperadmin = this.SUPERADMIN_EMAILS.includes(
       user.email.toLowerCase(),
     );
-    if (isHardcodedSuperadmin && user.role !== Role.SUPERADMIN) {
+    if (isHardcodedSuperadmin && (user.role !== Role.SUPERADMIN || user.status !== UserStatus.APPROVED)) {
       user = await this.prisma.user.update({
         where: { id: user.id },
         data: { role: Role.SUPERADMIN, status: UserStatus.APPROVED },

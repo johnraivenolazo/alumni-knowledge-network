@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -22,6 +23,7 @@ enum UserStatus {
   PENDING
   APPROVED
   REJECTED
+  BANNED
 }
 
 enum RequestStatus {
@@ -37,7 +39,7 @@ model User {
   name           String?
   profilePic     String?
   role           Role       @default(USER)
-  userType       UserType   @default(STUDENT)
+  userType       UserType?
   status         UserStatus @default(PENDING)
   bio            String?
   industry       String?
@@ -114,4 +116,3 @@ model Message {
 
   createdAt DateTime @default(now())
 }
-
