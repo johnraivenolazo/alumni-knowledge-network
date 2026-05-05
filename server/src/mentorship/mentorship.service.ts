@@ -50,6 +50,7 @@ export class MentorshipService {
     requestId: string,
     status: RequestStatus,
     userId: string,
+    userRole?: string,
   ) {
     const request = await this.prisma.mentorshipRequest.findUnique({
       where: { id: requestId },
@@ -58,30 +59,17 @@ export class MentorshipService {
 
     if (!request) throw new NotFoundException('Request not found');
 
-    console.log('[MentorshipService] respondToRequest debug:', {
-      requestId,
-      status,
-      userId,
-      requestStudentId: request.studentId,
-      requestAlumniId: request.alumniId
-    });
+    const isAdmin = userRole === 'ADMIN' || userRole === 'SUPERADMIN';
+    const isStudent = String(request.studentId) === String(userId);
+    const isAlumni = String(request.alumniId) === String(userId);
 
     if (status === RequestStatus.CANCELLED) {
-      const isAlumni = String(request.alumniId) === String(userId);
-      const isStudent = String(request.studentId) === String(userId);
-      
-      if (!isAlumni && !isStudent) {
-        console.error('[MentorshipService] CANCELLED check failed: userId not part of connection', {
-            userId,
-            alumniId: request.alumniId,
-            studentId: request.studentId
-        });
-        throw new ForbiddenException('You are not part of this connection');
+      if (!isStudent && !isAlumni && !isAdmin) {
+        throw new ForbiddenException('Unauthorized');
       }
     } else {
-      if (String(request.alumniId) !== String(userId)) {
-        console.error('[MentorshipService] Status change check failed: Only alumni can respond');
-        throw new ForbiddenException('Only the alumni can accept or decline requests');
+      if (!isAlumni && !isAdmin) {
+        throw new ForbiddenException('Unauthorized');
       }
     }
 
