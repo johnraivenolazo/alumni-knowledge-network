@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { isAuthenticated } from '$lib/authService';
 	const title = 'Alumni Knowledge Network';
 </script>
 
@@ -30,10 +31,10 @@
 				</p>
 				<div class="mt-10 flex items-center justify-center gap-x-6">
 					<a
-						href="{base}/login"
+						href={$isAuthenticated ? `${base}/feed` : `${base}/login`}
 						class="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black shadow-sm transition-all hover:bg-neutral-200 active:scale-95"
 					>
-						Get Started
+						{$isAuthenticated ? 'Enter Network' : 'Get Started'}
 					</a>
 					<a
 						href="#about"

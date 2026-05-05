@@ -27,7 +27,7 @@
 			const [reqs, alums] = await Promise.all([
 				api.get('/mentorship/my-requests'),
 				api.get(
-					`/users?userType=ALUMNI&search=${encodeURIComponent(filterQuery)}&industry=${encodeURIComponent(filterIndustry)}&batch=${encodeURIComponent(filterBatch)}`
+					`/users?userType=ALUMNI&status=APPROVED&search=${encodeURIComponent(filterQuery)}&industry=${encodeURIComponent(filterIndustry)}&batch=${encodeURIComponent(filterBatch)}`
 				)
 			]);
 			requests = reqs;
