@@ -49,34 +49,47 @@ export class MentorshipService {
   async respondToRequest(
     requestId: string,
     status: RequestStatus,
-    alumniId: string,
+    userId: string,
   ) {
     const request = await this.prisma.mentorshipRequest.findUnique({
       where: { id: requestId },
-      include: { student: true },
+      include: { student: true, alumni: true },
     });
 
     if (!request) throw new NotFoundException('Request not found');
-    if (request.alumniId !== alumniId)
-      throw new ForbiddenException('Unauthorized');
+
+    if (status === RequestStatus.CANCELLED) {
+      if (request.alumniId !== userId && request.studentId !== userId) {
+        throw new ForbiddenException('Unauthorized');
+      }
+    } else {
+      if (request.alumniId !== userId) {
+        throw new ForbiddenException('Unauthorized');
+      }
+    }
 
     const updatedRequest = await this.prisma.mentorshipRequest.update({
       where: { id: requestId },
       data: { status },
     });
 
-    // Notify student via SES
+    const notifyEmail =
+      userId === request.alumniId
+        ? request.student.email
+        : request.alumni.email;
+
+    // Notify the other user via SES
     await this.sendEmailNotification(
-      request.student.email,
+      notifyEmail,
       'Mentorship Request Status Updated',
-      `Your mentorship request has been ${status.toLowerCase()}.`,
+      `Your mentorship request status has been updated to ${status.toLowerCase()}.`,
     );
 
     return updatedRequest;
   }
 
   async getMyRequests(userId: string) {
-    return this.prisma.mentorshipRequest.findMany({
+    return await this.prisma.mentorshipRequest.findMany({
       where: {
         OR: [{ studentId: userId }, { alumniId: userId }],
       },
