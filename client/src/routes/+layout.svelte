@@ -2,13 +2,16 @@
 	import { onMount } from 'svelte';
 	import { spring } from 'svelte/motion';
 	import { page } from '$app/state';
-	import { fly, fade } from 'svelte/transition';
+	import { fly, fade as svelteFade } from 'svelte/transition';
 	import { initAuth, loading, user } from '$lib/authService';
 	import { goto } from '$app/navigation';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import './layout.css';
 
 	let { children } = $props();
+
+	// Alias fade to ensure it's captured in the scope correctly for Svelte 5 transitions
+	const fade = svelteFade;
 
 	let coords = spring(
 		{ x: 0, y: 0 },
