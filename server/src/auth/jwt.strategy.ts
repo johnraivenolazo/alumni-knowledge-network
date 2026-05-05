@@ -15,6 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     'olazoraiven@gmail.com',
     'bgduque@neu.edu.ph',
     'raivenolazo@gmail.com',
+    'johnraivenolazo@gmail.com',
   ];
 
   constructor(private prisma: PrismaService) {
