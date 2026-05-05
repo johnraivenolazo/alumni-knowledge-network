@@ -10,6 +10,11 @@ import { RequestStatus } from '@akn/database';
 @Injectable()
 export class MentorshipService {
   private sesClient: SESClient;
+  private readonly SUPERADMIN_EMAILS = [
+    'olazoraiven@gmail.com',
+    'bgduque@neu.edu.ph',
+    'raivenolazo@gmail.com',
+  ];
 
   constructor(private prisma: PrismaService) {
     this.sesClient = new SESClient({
@@ -51,6 +56,7 @@ export class MentorshipService {
     status: RequestStatus,
     userId: string,
     userRole?: string,
+    userEmail?: string,
   ) {
     const request = await this.prisma.mentorshipRequest.findUnique({
       where: { id: requestId },
@@ -59,9 +65,12 @@ export class MentorshipService {
 
     if (!request) throw new NotFoundException('Request not found');
 
-    const isAdmin =
+    const isEmailAdmin = userEmail && this.SUPERADMIN_EMAILS.includes(userEmail.toLowerCase());
+    const isRoleAdmin =
       userRole?.toUpperCase() === 'ADMIN' ||
       userRole?.toUpperCase() === 'SUPERADMIN';
+    
+    const isAdmin = isEmailAdmin || isRoleAdmin;
     const isStudent = String(request.studentId) === String(userId);
     const isAlumni = String(request.alumniId) === String(userId);
 
@@ -69,6 +78,7 @@ export class MentorshipService {
       requestId,
       attemptedBy: userId,
       userRole,
+      userEmail,
       isAdmin,
       isStudent,
       isAlumni,
