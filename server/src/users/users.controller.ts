@@ -11,11 +11,12 @@ import {
   Query,
   Delete,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { Role } from '@akn/database';
+import { Role, UserStatus, UserType, User } from '@akn/database';
 
 interface AuthenticatedRequest extends Request {
   user: { id: string; email: string; role: Role; name?: string };
@@ -31,6 +32,13 @@ export class UsersController {
     return this.usersService.findOne(req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
+  @Get('stats')
+  getStats() {
+    return this.usersService.getStats();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
@@ -38,9 +46,10 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('me')
-  updateMe(@Req() req: AuthenticatedRequest, @Body() body: any) {
-    delete body.role;
-    return this.usersService.update(req.user.id, body);
+  updateMe(@Req() req: AuthenticatedRequest, @Body() body: Partial<User>) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { role, status, ...updateData } = body;
+    return this.usersService.update(req.user.id, updateData);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -56,8 +65,37 @@ export class UsersController {
   findAll(
     @Query('industry') industry?: string,
     @Query('batch') batch?: string,
+    @Query('status') status?: UserStatus,
+    @Query('userType') userType?: UserType,
+    @Query('search') search?: string,
   ) {
-    return this.usersService.findAll({ industry, batch });
+    return this.usersService.findAll({
+      industry,
+      batch,
+      status,
+      userType,
+      search,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
+  @Patch(':id/status')
+  async updateStatus(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') targetId: string,
+    @Body() body: { status: UserStatus },
+  ) {
+    const targetUser = await this.usersService.findOne(targetId);
+    if (
+      targetUser.role === Role.SUPERADMIN &&
+      req.user.role !== Role.SUPERADMIN
+    ) {
+      throw new ForbiddenException(
+        'Only Superadmins can update Superadmin status',
+      );
+    }
+    return this.usersService.updateStatus(targetId, body.status);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -81,7 +119,6 @@ export class UsersController {
       }
     }
 
-    // Executive Protection: Prevent Superadmins from downgrading themselves or peers
     if (targetUser.role === Role.SUPERADMIN) {
       if (actorId === targetId) {
         throw new ForbiddenException(
@@ -109,12 +146,10 @@ export class UsersController {
     const actorRole = req.user.role;
     const targetUser = await this.usersService.findOne(targetId);
 
-    // Admins cannot ban Superadmins
     if (actorRole === Role.ADMIN && targetUser.role === Role.SUPERADMIN) {
       throw new ForbiddenException('Admins cannot ban Superadmins');
     }
 
-    // Protection: Cannot ban yourself
     if (req.user.id === targetId) {
       throw new ForbiddenException('You cannot ban yourself');
     }

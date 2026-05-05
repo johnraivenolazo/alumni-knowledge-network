@@ -3,7 +3,8 @@
 	import { spring } from 'svelte/motion';
 	import { page } from '$app/state';
 	import { fly } from 'svelte/transition';
-	import { initAuth, loading } from '$lib/authService';
+	import { initAuth, loading, user } from '$lib/authService';
+	import { goto } from '$app/navigation';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import './layout.css';
 
@@ -20,6 +21,24 @@
 	function handleMouseMove(e: MouseEvent) {
 		coords.set({ x: e.clientX, y: e.clientY });
 	}
+
+	// Status Guard Logic
+	$effect(() => {
+		if (!$loading) {
+			const path = page.url.pathname;
+			const publicRoutes = ['/', '/login', '/pending', '/banned'];
+
+			if ($user) {
+				if ($user.isBanned && path !== '/banned') {
+					goto('/banned');
+				} else if ($user.status === 'PENDING' && !publicRoutes.includes(path)) {
+					goto('/pending');
+				} else if ($user.status === 'APPROVED' && path === '/pending') {
+					goto('/feed');
+				}
+			}
+		}
+	});
 
 	onMount(async () => {
 		await initAuth();
@@ -59,7 +78,7 @@
 		</div>
 
 		<div class="relative z-10 flex min-h-screen flex-col">
-			{#if page.url.pathname !== '/banned'}
+			{#if page.url.pathname !== '/banned' && page.url.pathname !== '/pending' && page.url.pathname !== '/login'}
 				<Navbar />
 			{/if}
 			<main class="grid flex-grow">

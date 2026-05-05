@@ -10,11 +10,17 @@ import { Role } from '@akn/database';
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(authorId: string, title: string, content: string) {
+  async create(
+    authorId: string,
+    title: string,
+    content: string,
+    category: string = 'General',
+  ) {
     return this.prisma.post.create({
       data: {
         title,
         content,
+        category,
         authorId,
       },
       include: { author: true },
@@ -32,7 +38,21 @@ export class PostsService {
             profilePic: true,
             industry: true,
             role: true,
+            userType: true,
+            isExpert: true,
           },
+        },
+        comments: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+                profilePic: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
         },
       },
     });
@@ -41,19 +61,35 @@ export class PostsService {
   async findOne(id: string) {
     const post = await this.prisma.post.findUnique({
       where: { id },
-      include: { author: true },
+      include: {
+        author: true,
+        comments: {
+          include: {
+            author: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     });
     if (!post) throw new NotFoundException('Post not found');
     return post;
   }
 
+  async addComment(postId: string, authorId: string, content: string) {
+    return this.prisma.comment.create({
+      data: {
+        content,
+        authorId,
+        postId,
+      },
+      include: { author: true },
+    });
+  }
+
   async remove(id: string, userId: string, userRole: Role) {
     const post = await this.findOne(id);
 
-    // Hierarchy: Author, Admin, and Superadmin can delete
     const isAuthor = post.authorId === userId;
-
-    // Admin cannot delete Superadmin posts
     const isSuperadmin = userRole === Role.SUPERADMIN;
     const isAdmin = userRole === Role.ADMIN;
     const targetIsSuperadmin = post.author.role === Role.SUPERADMIN;
@@ -69,6 +105,27 @@ export class PostsService {
       );
     }
 
+    // Delete comments first
+    await this.prisma.comment.deleteMany({ where: { postId: id } });
+
     return this.prisma.post.delete({ where: { id } });
+  }
+
+  async removeComment(commentId: string, userId: string, userRole: Role) {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id: commentId },
+      include: { author: true },
+    });
+
+    if (!comment) throw new NotFoundException('Comment not found');
+
+    const isAuthor = comment.authorId === userId;
+    const isSuperadmin = userRole === Role.SUPERADMIN;
+
+    if (!isAuthor && !isSuperadmin) {
+      throw new ForbiddenException('You cannot delete this comment');
+    }
+
+    return this.prisma.comment.delete({ where: { id: commentId } });
   }
 }

@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
@@ -12,9 +13,10 @@ import { Role } from '@akn/database';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly SUPERADMIN_EMAILS = [
-    'olazoraiven@gmail.com',
+    'jcesperanza@neu.edu.ph',
+    'johnraivenolazo@gmail.com',
     'bgduque@neu.edu.ph',
-    'raivenolazo@gmail.com',
+    'olazoraiven@gmail.com',
   ];
 
   constructor(private prisma: PrismaService) {
@@ -33,9 +35,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(req: any, payload: any) {
-    let email = payload.email || payload['https://akn-api.com/email'];
-    let name = payload.name || payload['https://akn-api.com/name'];
+  async validate(req: Request, payload: Record<string, any>) {
+    let email = (payload.email as string) || (payload['https://akn-api.com/email'] as string);
+    let name = (payload.name as string) || (payload['https://akn-api.com/name'] as string);
 
     // If Auth0 access token doesn't include email, fetch from /userinfo
     if (!email) {

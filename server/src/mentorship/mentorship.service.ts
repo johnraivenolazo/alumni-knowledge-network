@@ -58,13 +58,30 @@ export class MentorshipService {
 
     if (!request) throw new NotFoundException('Request not found');
 
+    console.log('[MentorshipService] respondToRequest debug:', {
+      requestId,
+      status,
+      userId,
+      requestStudentId: request.studentId,
+      requestAlumniId: request.alumniId
+    });
+
     if (status === RequestStatus.CANCELLED) {
-      if (request.alumniId !== userId && request.studentId !== userId) {
-        throw new ForbiddenException('Unauthorized');
+      const isAlumni = String(request.alumniId) === String(userId);
+      const isStudent = String(request.studentId) === String(userId);
+      
+      if (!isAlumni && !isStudent) {
+        console.error('[MentorshipService] CANCELLED check failed: userId not part of connection', {
+            userId,
+            alumniId: request.alumniId,
+            studentId: request.studentId
+        });
+        throw new ForbiddenException('You are not part of this connection');
       }
     } else {
-      if (request.alumniId !== userId) {
-        throw new ForbiddenException('Unauthorized');
+      if (String(request.alumniId) !== String(userId)) {
+        console.error('[MentorshipService] Status change check failed: Only alumni can respond');
+        throw new ForbiddenException('Only the alumni can accept or decline requests');
       }
     }
 
