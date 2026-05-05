@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -20,12 +21,25 @@ enum RequestStatus {
   CANCELLED
 }
 
+enum UserStatus {
+  PENDING
+  APPROVED
+  BANNED
+}
+
+enum UserType {
+  STUDENT
+  ALUMNI
+}
+
 model User {
   id             String   @id @default(cuid())
   email          String   @unique
   name           String?
   profilePic     String?
   role           Role     @default(USER)
+  status         UserStatus @default(PENDING)
+  userType       UserType?
   bio            String?
   industry       String?
   batch          String?
