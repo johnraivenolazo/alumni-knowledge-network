@@ -59,16 +59,32 @@ export class MentorshipService {
 
     if (!request) throw new NotFoundException('Request not found');
 
-    const isAdmin = userRole === 'ADMIN' || userRole === 'SUPERADMIN';
+    const isAdmin =
+      userRole?.toUpperCase() === 'ADMIN' ||
+      userRole?.toUpperCase() === 'SUPERADMIN';
     const isStudent = String(request.studentId) === String(userId);
     const isAlumni = String(request.alumniId) === String(userId);
 
+    console.log('[MentorshipAuth] Detailed Check:', {
+      requestId,
+      attemptedBy: userId,
+      userRole,
+      isAdmin,
+      isStudent,
+      isAlumni,
+      requestStudentId: request.studentId,
+      requestAlumniId: request.alumniId,
+      requestedStatus: status,
+    });
+
     if (status === RequestStatus.CANCELLED) {
       if (!isStudent && !isAlumni && !isAdmin) {
+        console.error('[MentorshipAuth] Forbidden: Not authorized to cancel');
         throw new ForbiddenException('Unauthorized');
       }
     } else {
       if (!isAlumni && !isAdmin) {
+        console.error('[MentorshipAuth] Forbidden: Not authorized to respond');
         throw new ForbiddenException('Unauthorized');
       }
     }
