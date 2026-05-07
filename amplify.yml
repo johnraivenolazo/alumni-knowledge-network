@@ -1,3 +1,7 @@
+# For local deployments STRICTLY do not refer to this YAML.
+# This is only used for AWS Amplify Development refer to the following: https://docs.amplify.aws/
+# Please only configure this if you are planning to duplicate the following environment we used.
+
 # AWS Amplify Standard Build Spec (pnpm Monorepo compatible)
 version: 1
 frontend:
