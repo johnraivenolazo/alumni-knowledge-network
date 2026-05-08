@@ -4,7 +4,7 @@
 	import { api } from '$lib/api';
 	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
 	import { goto } from '$app/navigation';
-	import type { Post, Comment } from '$lib/types';
+	import type { Post, Comment, PostReaction, ReactionType } from '$lib/types';
 
 	let posts = $state<Post[]>([]);
 	let loading = $state(true);
@@ -53,6 +53,50 @@
 			});
 			commentText[postId] = '';
 		} catch (e: unknown) {
+			alert((e as Error).message);
+		}
+	}
+
+	const REACTIONS: { type: ReactionType; label: string; emoji: string; color: string }[] = [
+		{ type: 'WOW', label: 'Wow', emoji: '😮', color: 'text-amber-300' },
+		{ type: 'HELPFUL', label: 'Helpful', emoji: '🤝', color: 'text-emerald-300' },
+		{ type: 'INSIGHTFUL', label: 'Insightful', emoji: '💡', color: 'text-sky-300' }
+	];
+
+	let openReactionPicker = $state<string | null>(null);
+
+	function reactionCounts(post: Post): Record<ReactionType, number> {
+		const counts: Record<ReactionType, number> = { WOW: 0, HELPFUL: 0, INSIGHTFUL: 0 };
+		for (const r of post.reactions || []) counts[r.type]++;
+		return counts;
+	}
+
+	function myReaction(post: Post): ReactionType | null {
+		if (!$user) return null;
+		return post.reactions?.find((r) => r.userId === $user!.id)?.type ?? null;
+	}
+
+	async function handleReact(postId: string, type: ReactionType) {
+		const post = posts.find((p) => p.id === postId);
+		if (!post) return;
+		const current = myReaction(post);
+		const next = current === type ? null : type;
+
+		const previousReactions = post.reactions || [];
+		const optimistic: PostReaction[] = previousReactions.filter((r) => r.userId !== $user?.id);
+		if (next && $user) {
+			optimistic.push({ id: 'optimistic', userId: $user.id, type: next });
+		}
+		posts = posts.map((p) => (p.id === postId ? { ...p, reactions: optimistic } : p));
+		openReactionPicker = null;
+
+		try {
+			const updated: PostReaction[] = await api.post(`/posts/${postId}/reactions`, {
+				type: next
+			});
+			posts = posts.map((p) => (p.id === postId ? { ...p, reactions: updated } : p));
+		} catch (e: unknown) {
+			posts = posts.map((p) => (p.id === postId ? { ...p, reactions: previousReactions } : p));
 			alert((e as Error).message);
 		}
 	}
@@ -106,6 +150,15 @@
 		</div>
 	</div>
 {/snippet}
+
+<svelte:window
+	onclick={(e) => {
+		const target = e.target as HTMLElement;
+		if (!target.closest('[data-reaction-root]')) {
+			openReactionPicker = null;
+		}
+	}}
+/>
 
 <div class="mx-auto max-w-4xl px-6 py-20 font-sans">
 	{#if $isAuthenticated}
@@ -293,6 +346,62 @@
 						</div>
 
 						<div class="sm:ml-[4.5rem]">
+							{#snippet reactionBar(p: Post)}
+								{@const counts = reactionCounts(p)}
+								{@const mine = myReaction(p)}
+								{@const total = (p.reactions || []).length}
+								<div class="mb-6 flex flex-wrap items-center gap-3">
+									<div class="relative" data-reaction-root>
+										<button
+											onclick={() => (openReactionPicker = openReactionPicker === p.id ? null : p.id)}
+											class="flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold tracking-wide uppercase transition-all {mine
+												? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-300'
+												: 'border-white/10 bg-white/5 text-neutral-400 hover:border-white/20 hover:bg-white/10 hover:text-white'}"
+										>
+											{#if mine}
+												{@const r = REACTIONS.find((x) => x.type === mine)!}
+												<span>{r.emoji}</span>
+												<span>{r.label}</span>
+											{:else}
+												<span>+ React</span>
+											{/if}
+										</button>
+										{#if openReactionPicker === p.id}
+											<div
+												in:fly={{ y: 6, duration: 150 }}
+												class="absolute bottom-full left-0 z-10 mb-2 flex gap-1 rounded-full border border-white/10 bg-neutral-900 p-1.5 shadow-2xl"
+											>
+												{#each REACTIONS as r (r.type)}
+													<button
+														onclick={() => handleReact(p.id, r.type)}
+														title={r.label}
+														class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all hover:scale-110 hover:bg-white/10 {r.color}"
+													>
+														<span class="text-base">{r.emoji}</span>
+														<span class="hidden sm:inline">{r.label}</span>
+													</button>
+												{/each}
+											</div>
+										{/if}
+									</div>
+									{#if total > 0}
+										<div class="flex items-center gap-2">
+											{#each REACTIONS as r (r.type)}
+												{#if counts[r.type] > 0}
+													<span
+														class="flex items-center gap-1 rounded-full border border-white/5 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-neutral-300"
+													>
+														<span>{r.emoji}</span>
+														<span class="{r.color}">{counts[r.type]}</span>
+													</span>
+												{/if}
+											{/each}
+										</div>
+									{/if}
+								</div>
+							{/snippet}
+							{@render reactionBar(post)}
+
 							<div
 								class="mb-8 flex items-center gap-2 text-xs font-bold tracking-widest text-neutral-600 uppercase"
 							>

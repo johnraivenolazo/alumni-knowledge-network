@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { api } from '$lib/api';
 	import { user } from '$lib/authService';
-	import { type User, type UserType } from '$lib/types';
+	import { type User, type UserType, displayUserType } from '$lib/types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let profileUser = $state<User | null>(null);
@@ -111,7 +111,7 @@
 									<span
 										class="rounded-lg border border-white/5 bg-white/5 px-3 py-1 text-[10px] font-black tracking-[0.2em] text-neutral-400 uppercase"
 									>
-										{profileUser.userType || 'STUDENT'}
+										{displayUserType(profileUser) || 'STUDENT'}
 									</span>
 									<span
 										class="rounded-lg border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase

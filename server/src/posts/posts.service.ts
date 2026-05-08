@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Role } from '@akn/database';
+import { Role, ReactionType } from '@akn/database';
 
 @Injectable()
 export class PostsService {
@@ -53,6 +53,9 @@ export class PostsService {
             },
           },
           orderBy: { createdAt: 'asc' },
+        },
+        reactions: {
+          select: { id: true, userId: true, type: true },
         },
       },
     });
@@ -109,6 +112,32 @@ export class PostsService {
     await this.prisma.comment.deleteMany({ where: { postId: id } });
 
     return this.prisma.post.delete({ where: { id } });
+  }
+
+  async setReaction(
+    postId: string,
+    userId: string,
+    type: ReactionType | null,
+  ) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new NotFoundException('Post not found');
+
+    if (type === null) {
+      await this.prisma.postReaction.deleteMany({
+        where: { postId, userId },
+      });
+    } else {
+      await this.prisma.postReaction.upsert({
+        where: { postId_userId: { postId, userId } },
+        update: { type },
+        create: { postId, userId, type },
+      });
+    }
+
+    return this.prisma.postReaction.findMany({
+      where: { postId },
+      select: { id: true, userId: true, type: true },
+    });
   }
 
   async removeComment(commentId: string, userId: string, userRole: Role) {

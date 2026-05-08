@@ -2,6 +2,12 @@ export type Role = 'USER' | 'ADMIN' | 'SUPERADMIN';
 export type UserStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type UserType = 'STUDENT' | 'ALUMNI';
 
+export function displayUserType(u?: { role?: Role; userType?: UserType } | null): string {
+	if (!u) return '';
+	if (u.role === 'ADMIN' || u.role === 'SUPERADMIN') return 'STAFF';
+	return u.userType || '';
+}
+
 export interface User {
 	id: string;
 	name: string;
@@ -18,6 +24,14 @@ export interface User {
 	isBanned: boolean;
 }
 
+export type ReactionType = 'WOW' | 'HELPFUL' | 'INSIGHTFUL';
+
+export interface PostReaction {
+	id: string;
+	userId: string;
+	type: ReactionType;
+}
+
 export interface Post {
 	id: string;
 	title: string;
@@ -25,7 +39,9 @@ export interface Post {
 	category: string;
 	createdAt: string;
 	author?: User;
+	authorId?: string;
 	comments?: Comment[];
+	reactions?: PostReaction[];
 }
 
 export interface Comment {
@@ -68,4 +84,12 @@ export interface SystemStats {
 	alumni: number;
 	pending: number;
 	industryStats: { industry: string; _count: { _all: number } }[];
+	postLividity?: number;
+	totalPosts?: number;
+	postsLast7Days?: number;
+	postsByDay?: { day: string; count: number }[];
+	alumniConsistency?: number;
+	studentConsistency?: number;
+	mostUsedInteraction?: { type: ReactionType; count: number } | null;
+	reactionBreakdown?: { type: ReactionType; count: number }[];
 }

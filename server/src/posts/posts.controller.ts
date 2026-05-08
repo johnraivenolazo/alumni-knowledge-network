@@ -11,7 +11,7 @@ import {
 import { Request } from 'express';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Role } from '@akn/database';
+import { Role, ReactionType } from '@akn/database';
 
 interface AuthenticatedRequest extends Request {
   user: { id: string; email: string; role: Role; name?: string };
@@ -53,6 +53,16 @@ export class PostsController {
     @Body() body: { content: string },
   ) {
     return this.postsService.addComment(id, req.user.id, body.content);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/reactions')
+  setReaction(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() body: { type: ReactionType | null },
+  ) {
+    return this.postsService.setReaction(id, req.user.id, body.type ?? null);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -122,6 +122,35 @@ export class UsersService {
     });
   }
 
+  async adminCreate(data: {
+    email: string;
+    name?: string;
+    role?: Role;
+    userType?: UserType;
+    industry?: string;
+    batch?: string;
+    bio?: string;
+  }) {
+    const email = data.email.trim().toLowerCase();
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new ForbiddenException('A user with that email already exists');
+    }
+
+    return this.prisma.user.create({
+      data: {
+        email,
+        name: data.name,
+        role: data.role ?? Role.USER,
+        userType: data.userType ?? UserType.STUDENT,
+        industry: data.industry,
+        batch: data.batch,
+        bio: data.bio,
+        status: UserStatus.APPROVED,
+      },
+    });
+  }
+
   async generatePresignedUrl(userId: string, fileName: string) {
     const bucketName = process.env.AWS_S3_BUCKET;
     const key = `profiles/${userId}/${Date.now()}-${fileName}`;
@@ -230,12 +259,74 @@ export class UsersService {
       where: { industry: { not: null } },
     });
 
+    const totalPosts = await this.prisma.post.count();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const recentPosts = await this.prisma.post.findMany({
+      where: { createdAt: { gte: sevenDaysAgo } },
+      select: { createdAt: true, authorId: true, author: { select: { userType: true } } },
+    });
+
+    const postsByDay: { day: string; count: number }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sevenDaysAgo);
+      d.setDate(d.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      postsByDay.push({ day: key, count: 0 });
+    }
+    for (const p of recentPosts) {
+      const key = p.createdAt.toISOString().slice(0, 10);
+      const slot = postsByDay.find((s) => s.day === key);
+      if (slot) slot.count++;
+    }
+    const postsLast7Days = recentPosts.length;
+    // Lividity = liveliness; ratio of recent posts to active members (0-100)
+    const postLividity = totalUsers
+      ? Math.min(100, Math.round((postsLast7Days / totalUsers) * 100))
+      : 0;
+
+    const activeAlumniIds = new Set<string>();
+    const activeStudentIds = new Set<string>();
+    for (const p of recentPosts) {
+      if (p.author?.userType === UserType.ALUMNI) activeAlumniIds.add(p.authorId);
+      if (p.author?.userType === UserType.STUDENT) activeStudentIds.add(p.authorId);
+    }
+    const alumniConsistency = alumni
+      ? Math.round((activeAlumniIds.size / alumni) * 100)
+      : 0;
+    const studentConsistency = students
+      ? Math.round((activeStudentIds.size / students) * 100)
+      : 0;
+
+    const reactionGroups = await this.prisma.postReaction.groupBy({
+      by: ['type'],
+      _count: { _all: true },
+    });
+    const reactionBreakdown = reactionGroups.map((g) => ({
+      type: g.type,
+      count: g._count._all,
+    }));
+    const mostUsedInteraction =
+      reactionBreakdown.length > 0
+        ? reactionBreakdown.reduce((a, b) => (a.count >= b.count ? a : b))
+        : null;
+
     return {
       totalUsers,
       students,
       alumni,
       pending,
       industryStats,
+      totalPosts,
+      postsLast7Days,
+      postsByDay,
+      postLividity,
+      alumniConsistency,
+      studentConsistency,
+      reactionBreakdown,
+      mostUsedInteraction,
     };
   }
 }

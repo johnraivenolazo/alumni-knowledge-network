@@ -4,7 +4,7 @@
 	import { api } from '$lib/api';
 	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
 	import { goto } from '$app/navigation';
-	import type { User, SystemStats, UserStatus } from '$lib/types';
+	import { type User, type SystemStats, type UserStatus, displayUserType } from '$lib/types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let activeTab = $state<'overview' | 'pending' | 'users'>('overview');
@@ -14,6 +14,48 @@
 	let loading = $state(true);
 	let error = $state('');
 	let editingUser = $state<User | null>(null);
+	let creatingUser = $state(false);
+	let newUser = $state({
+		email: '',
+		name: '',
+		role: 'USER' as 'USER' | 'ADMIN' | 'SUPERADMIN',
+		userType: 'STUDENT' as 'STUDENT' | 'ALUMNI',
+		industry: '',
+		batch: ''
+	});
+	let createError = $state('');
+	let createSubmitting = $state(false);
+
+	function resetNewUser() {
+		newUser = {
+			email: '',
+			name: '',
+			role: 'USER',
+			userType: 'STUDENT',
+			industry: '',
+			batch: ''
+		};
+		createError = '';
+	}
+
+	async function handleCreateUser() {
+		if (!newUser.email) {
+			createError = 'Email is required';
+			return;
+		}
+		createSubmitting = true;
+		createError = '';
+		try {
+			await api.post('/users', newUser);
+			creatingUser = false;
+			resetNewUser();
+			await loadData();
+		} catch (e: any) {
+			createError = e.message || 'Failed to create user';
+		} finally {
+			createSubmitting = false;
+		}
+	}
 
 	async function loadData() {
 		if (!$isAuthenticated) return;
@@ -201,6 +243,140 @@
 				{/if}
 			</div>
 
+			<!-- Engagement Analytics -->
+			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+				<!-- Post Lividity -->
+				<div
+					class="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-500/20 via-pink-500/10 to-fuchsia-500/20 p-6"
+				>
+					<div class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-rose-500/30 blur-2xl"></div>
+					<p class="text-[10px] font-bold tracking-widest text-rose-200 uppercase">
+						Post Lividity
+					</p>
+					{#if loading}
+						<Skeleton class="mt-3 h-10 w-20" />
+					{:else}
+						<p class="mt-2 text-4xl font-black tracking-tighter text-white">
+							{stats?.postLividity ?? 0}<span class="text-2xl text-rose-200/70">%</span>
+						</p>
+						<p class="mt-2 text-xs text-rose-100/70">
+							{stats?.postsLast7Days ?? 0} posts in last 7 days
+						</p>
+						<div class="mt-4 flex h-10 items-end gap-1">
+							{#each stats?.postsByDay || [] as d (d.day)}
+								{@const max = Math.max(1, ...(stats?.postsByDay || []).map((x) => x.count))}
+								<div
+									class="flex-1 rounded-t bg-gradient-to-t from-rose-500 to-pink-300"
+									style="height: {(d.count / max) * 100}%; min-height: 2px;"
+									title="{d.day}: {d.count}"
+								></div>
+							{/each}
+						</div>
+					{/if}
+				</div>
+
+				<!-- Alumni Consistency -->
+				<div
+					class="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-yellow-500/20 p-6"
+				>
+					<div
+						class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-amber-500/30 blur-2xl"
+					></div>
+					<p class="text-[10px] font-bold tracking-widest text-amber-200 uppercase">
+						Alumni's Consistency
+					</p>
+					{#if loading}
+						<Skeleton class="mt-3 h-10 w-20" />
+					{:else}
+						<p class="mt-2 text-4xl font-black tracking-tighter text-white">
+							{stats?.alumniConsistency ?? 0}<span class="text-2xl text-amber-200/70">%</span>
+						</p>
+						<p class="mt-2 text-xs text-amber-100/70">posted in the last week</p>
+						<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-amber-900/40">
+							<div
+								class="h-full rounded-full bg-gradient-to-r from-amber-400 to-yellow-300"
+								style="width: {stats?.alumniConsistency ?? 0}%"
+							></div>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Student Consistency -->
+				<div
+					class="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20 p-6"
+				>
+					<div
+						class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-emerald-500/30 blur-2xl"
+					></div>
+					<p class="text-[10px] font-bold tracking-widest text-emerald-200 uppercase">
+						Student's Consistency
+					</p>
+					{#if loading}
+						<Skeleton class="mt-3 h-10 w-20" />
+					{:else}
+						<p class="mt-2 text-4xl font-black tracking-tighter text-white">
+							{stats?.studentConsistency ?? 0}<span class="text-2xl text-emerald-200/70">%</span>
+						</p>
+						<p class="mt-2 text-xs text-emerald-100/70">posted in the last week</p>
+						<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-emerald-900/40">
+							<div
+								class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300"
+								style="width: {stats?.studentConsistency ?? 0}%"
+							></div>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Most Used Interaction -->
+				<div
+					class="relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/20 via-violet-500/10 to-purple-500/20 p-6"
+				>
+					<div
+						class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-indigo-500/30 blur-2xl"
+					></div>
+					<p class="text-[10px] font-bold tracking-widest text-indigo-200 uppercase">
+						Most Used Interaction
+					</p>
+					{#if loading}
+						<Skeleton class="mt-3 h-10 w-32" />
+					{:else if stats?.mostUsedInteraction}
+						{@const top = stats.mostUsedInteraction}
+						{@const emoji =
+							top.type === 'WOW' ? '😮' : top.type === 'HELPFUL' ? '🤝' : '💡'}
+						<div class="mt-2 flex items-center gap-3">
+							<span class="text-4xl">{emoji}</span>
+							<div>
+								<p class="text-2xl font-black tracking-tight text-white">
+									{top.type.charAt(0) + top.type.slice(1).toLowerCase()}
+								</p>
+								<p class="text-xs text-indigo-100/70">{top.count} reactions</p>
+							</div>
+						</div>
+						<div class="mt-4 space-y-2">
+							{#each stats.reactionBreakdown || [] as r (r.type)}
+								{@const e = r.type === 'WOW' ? '😮' : r.type === 'HELPFUL' ? '🤝' : '💡'}
+								{@const max = Math.max(
+									1,
+									...(stats.reactionBreakdown || []).map((x) => x.count)
+								)}
+								<div class="flex items-center gap-2 text-xs">
+									<span class="w-5">{e}</span>
+									<div class="h-1.5 flex-1 overflow-hidden rounded-full bg-indigo-900/40">
+										<div
+											class="h-full rounded-full bg-gradient-to-r from-indigo-400 to-violet-300"
+											style="width: {(r.count / max) * 100}%"
+										></div>
+									</div>
+									<span class="w-8 text-right text-indigo-100/80">{r.count}</span>
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<p class="mt-3 text-sm text-indigo-100/70 italic">No reactions yet</p>
+					{/if}
+				</div>
+			</div>
+
 			<!-- Industry Report Section -->
 			<div class="overflow-hidden rounded-3xl border border-white/5 bg-neutral-900/50">
 				<div class="border-b border-white/5 bg-white/5 px-8 py-6">
@@ -339,7 +515,7 @@
 									<p class="text-xs text-neutral-500">
 										{u.email} •
 										<span class="font-medium tracking-wider text-indigo-400 uppercase"
-											>{u.userType}</span
+											>{displayUserType(u)}</span
 										>
 									</p>
 								</div>
@@ -362,8 +538,21 @@
 			{/if}
 		</div>
 	{:else}
+		<div in:fade={{ duration: 200 }}>
+			{#if $user?.role === 'SUPERADMIN'}
+				<div class="mb-4 flex justify-end">
+					<button
+						onclick={() => {
+							resetNewUser();
+							creatingUser = true;
+						}}
+						class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:from-emerald-400 hover:to-teal-400 active:scale-95"
+					>
+						+ New User
+					</button>
+				</div>
+			{/if}
 		<div
-			in:fade={{ duration: 200 }}
 			class="overflow-hidden rounded-3xl border border-white/5 bg-neutral-900/50 shadow-2xl"
 		>
 			<div class="overflow-x-auto">
@@ -494,6 +683,7 @@
 					</tbody>
 				</table>
 			</div>
+		</div>
 		</div>
 	{/if}
 </div>
@@ -678,6 +868,159 @@
 					class="rounded-lg bg-white px-8 py-3 text-[10px] font-bold tracking-widest text-black uppercase transition-all hover:bg-neutral-200 active:scale-95"
 				>
 					Save Changes
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if creatingUser}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+		in:fade={{ duration: 150 }}
+		out:fade={{ duration: 150 }}
+	>
+		<div
+			class="w-full max-w-md overflow-hidden rounded-2xl border border-emerald-500/20 bg-neutral-900 shadow-2xl"
+			in:fly={{ y: 20, duration: 200 }}
+			out:fly={{ y: 20, duration: 200 }}
+		>
+			<div
+				class="flex items-center justify-between border-b border-white/5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 px-6 py-4"
+			>
+				<h3 class="text-lg font-bold text-white">Create New User</h3>
+				<button
+					onclick={() => (creatingUser = false)}
+					class="text-neutral-500 transition-colors hover:text-white"
+					aria-label="Close"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"
+						></line></svg
+					>
+				</button>
+			</div>
+			<div class="space-y-4 p-6">
+				<div>
+					<label
+						for="new-user-email"
+						class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+						>Email *</label
+					>
+					<input
+						id="new-user-email"
+						type="email"
+						bind:value={newUser.email}
+						placeholder="user@neu.edu.ph"
+						class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+					/>
+				</div>
+				<div>
+					<label
+						for="new-user-name"
+						class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+						>Name</label
+					>
+					<input
+						id="new-user-name"
+						type="text"
+						bind:value={newUser.name}
+						placeholder="Full Name"
+						class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+					/>
+				</div>
+				<div class="grid grid-cols-2 gap-4">
+					<div>
+						<label
+							for="new-user-role"
+							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+							>Role</label
+						>
+						<select
+							id="new-user-role"
+							bind:value={newUser.role}
+							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-emerald-500/40 focus:outline-none"
+						>
+							<option value="USER">User</option>
+							<option value="ADMIN">Admin</option>
+							<option value="SUPERADMIN">Superadmin</option>
+						</select>
+					</div>
+					<div>
+						<label
+							for="new-user-type"
+							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+							>User Type</label
+						>
+						<select
+							id="new-user-type"
+							bind:value={newUser.userType}
+							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-emerald-500/40 focus:outline-none"
+						>
+							<option value="STUDENT">Student</option>
+							<option value="ALUMNI">Alumni</option>
+						</select>
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-4">
+					<div>
+						<label
+							for="new-user-industry"
+							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+							>Industry</label
+						>
+						<input
+							id="new-user-industry"
+							type="text"
+							bind:value={newUser.industry}
+							placeholder="e.g. Tech"
+							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+						/>
+					</div>
+					<div>
+						<label
+							for="new-user-batch"
+							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
+							>Batch</label
+						>
+						<input
+							id="new-user-batch"
+							type="text"
+							bind:value={newUser.batch}
+							placeholder="e.g. 2024"
+							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+						/>
+					</div>
+				</div>
+				{#if createError}
+					<p class="text-xs font-medium text-red-400">{createError}</p>
+				{/if}
+				<p class="text-[10px] text-neutral-500 italic">
+					New users created here are automatically marked as APPROVED.
+				</p>
+			</div>
+			<div class="flex justify-end gap-6 border-t border-white/5 bg-neutral-950/50 px-8 py-6">
+				<button
+					onclick={() => (creatingUser = false)}
+					class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase transition-colors hover:text-white"
+				>
+					Cancel
+				</button>
+				<button
+					onclick={handleCreateUser}
+					disabled={createSubmitting}
+					class="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-3 text-[10px] font-bold tracking-widest text-white uppercase shadow-lg shadow-emerald-500/20 transition-all hover:from-emerald-400 hover:to-teal-400 active:scale-95 disabled:opacity-50"
+				>
+					{createSubmitting ? 'Creating...' : 'Create User'}
 				</button>
 			</div>
 		</div>

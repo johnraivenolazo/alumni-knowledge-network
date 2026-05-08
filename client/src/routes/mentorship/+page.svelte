@@ -3,7 +3,7 @@
 	import { fly, fade, slide } from 'svelte/transition';
 	import { api } from '$lib/api';
 	import { user, isAuthenticated } from '$lib/authService';
-	import type { User, MentorshipRequest } from '$lib/types';
+	import { type User, type MentorshipRequest, displayUserType } from '$lib/types';
 	import ChatWindow from '$lib/components/chat/ChatWindow.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -129,7 +129,7 @@
 								<div>
 									<h3 class="text-xl font-medium text-white">{partner.name}</h3>
 									<p class="mt-1 text-sm text-neutral-500">
-										{partner.industry || 'General'} • {partner.userType}
+										{partner.industry || 'General'} • {displayUserType(partner)}
 									</p>
 								</div>
 							</div>

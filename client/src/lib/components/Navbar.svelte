@@ -62,6 +62,13 @@
 						class="rounded-lg px-4 py-2 text-sm font-medium text-neutral-400 transition-all hover:bg-white/5 hover:text-white"
 						>Mentorship</a
 					>
+					{#if $user?.role === 'SUPERADMIN'}
+						<a
+							href="{base}/admin"
+							class="rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-rose-500/10 px-4 py-2 text-sm font-bold tracking-wide text-amber-300 transition-all hover:border-amber-400/50 hover:from-amber-500/20 hover:to-rose-500/20 hover:text-amber-200"
+							>Admin Dashboard</a
+						>
+					{/if}
 				</div>
 			</div>
 
@@ -136,7 +143,7 @@
 										My Profile
 									</a>
 
-									{#if $user?.role === 'ADMIN' || $user?.role === 'SUPERADMIN'}
+									{#if $user?.role === 'ADMIN'}
 										<a
 											href="{base}/admin"
 											onclick={closeMenu}

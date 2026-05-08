@@ -170,6 +170,27 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPERADMIN)
+  @Post()
+  async createManually(
+    @Body()
+    body: {
+      email: string;
+      name?: string;
+      role?: Role;
+      userType?: UserType;
+      industry?: string;
+      batch?: string;
+      bio?: string;
+    },
+  ) {
+    if (!body?.email) {
+      throw new ForbiddenException('Email is required');
+    }
+    return this.usersService.adminCreate(body);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SUPERADMIN)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);
