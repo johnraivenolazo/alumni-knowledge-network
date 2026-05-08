@@ -101,8 +101,35 @@ export class UsersService {
 
     const updateData: Partial<User> = { ...data };
 
-    // Security Guard: If userType is changing and user is NOT a superadmin,
-    // reset status to PENDING for re-verification.
+    // Hardened identity fields cannot be self-modified once the faculty has
+    // verified the account. Superadmins remain unrestricted for recovery.
+    if (existingUser.status === UserStatus.APPROVED && !isSuperadmin) {
+      if (
+        updateData.userType !== undefined &&
+        updateData.userType !== existingUser.userType
+      ) {
+        throw new ForbiddenException(
+          'Network Member Type is locked after verification',
+        );
+      }
+      if (
+        updateData.industry !== undefined &&
+        updateData.industry !== existingUser.industry
+      ) {
+        throw new ForbiddenException(
+          'Primary Industry is locked after verification',
+        );
+      }
+      if (
+        updateData.batch !== undefined &&
+        updateData.batch !== existingUser.batch
+      ) {
+        throw new ForbiddenException(
+          'Graduation Batch is locked after verification',
+        );
+      }
+    }
+
     if (data.userType && data.userType !== existingUser.userType) {
       if (!isSuperadmin) {
         updateData.status = UserStatus.PENDING;

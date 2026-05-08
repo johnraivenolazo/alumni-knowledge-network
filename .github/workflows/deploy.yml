@@ -65,7 +65,7 @@ jobs:
             exit 1
           fi
           pnpm install --frozen-lockfile --filter @akn/database...
-          pnpm --filter @akn/database exec prisma db push --skip-generate
+          pnpm --filter @akn/database exec prisma db push
 
       - name: Update ECS service
         run: |
