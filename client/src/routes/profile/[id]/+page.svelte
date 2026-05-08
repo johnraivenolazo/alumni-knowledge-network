@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { api } from '$lib/api';
 	import { user } from '$lib/authService';
-	import { type User, type UserType, displayUserType } from '$lib/types';
+	import { type User, type UserType, displayUserType, userTypeBadgeClass } from '$lib/types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let profileUser = $state<User | null>(null);
@@ -12,6 +12,7 @@
 	let isEditing = $state(false);
 	let editData = $state({ bio: '', industry: '', batch: '', userType: 'STUDENT' as UserType });
 	let isMyProfile = $derived(page.params.id === 'me' || profileUser?.id === $user?.id);
+	let identityLocked = $derived(profileUser?.status === 'APPROVED');
 
 	async function loadProfile() {
 		try {
@@ -32,7 +33,13 @@
 
 	async function handleUpdate() {
 		try {
-			const updated = await api.patch('/users/me', editData);
+			const payload: Record<string, unknown> = { bio: editData.bio };
+			if (!identityLocked) {
+				payload.userType = editData.userType;
+				payload.industry = editData.industry;
+				payload.batch = editData.batch;
+			}
+			const updated = await api.patch('/users/me', payload);
 			profileUser = { ...profileUser, ...updated };
 			isEditing = false;
 		} catch (e) {
@@ -102,28 +109,28 @@
 
 				<div class="flex-grow space-y-6">
 					<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-						<div class="space-y-2">
-							<div class="flex flex-wrap items-center gap-3">
-								<h1 class="text-4xl font-black tracking-tighter text-white">
-									{profileUser.name || 'Anonymous User'}
-								</h1>
-								<div class="flex gap-2">
-									<span
-										class="rounded-lg border border-white/5 bg-white/5 px-3 py-1 text-[10px] font-black tracking-[0.2em] text-neutral-400 uppercase"
-									>
-										{displayUserType(profileUser) || 'STUDENT'}
-									</span>
-									<span
-										class="rounded-lg border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase
-										{profileUser.role === 'SUPERADMIN'
-											? 'border-purple-500/20 bg-purple-500/10 text-purple-400'
-											: profileUser.role === 'ADMIN'
-												? 'border-indigo-500/20 bg-indigo-500/10 text-indigo-400'
-												: 'border-white/5 bg-white/5 text-neutral-500'}"
-									>
-										{profileUser.role}
-									</span>
-								</div>
+						<div class="space-y-3">
+							<h1 class="text-4xl font-black tracking-tighter text-white">
+								{profileUser.name || 'Anonymous User'}
+							</h1>
+							<div class="flex flex-wrap items-center gap-2">
+								<span
+									class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase {userTypeBadgeClass(
+										profileUser
+									)}"
+								>
+									{displayUserType(profileUser) || 'STUDENT'}
+								</span>
+								<span
+									class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase
+									{profileUser.role === 'SUPERADMIN'
+										? 'border-purple-500/20 bg-purple-500/10 text-purple-400'
+										: profileUser.role === 'ADMIN'
+											? 'border-indigo-500/20 bg-indigo-500/10 text-indigo-400'
+											: 'border-white/5 bg-white/5 text-neutral-500'}"
+								>
+									{profileUser.role}
+								</span>
 							</div>
 							<p class="text-sm font-medium text-neutral-500">{profileUser.email}</p>
 						</div>
@@ -140,22 +147,55 @@
 
 					{#if isEditing}
 						<div in:fly={{ y: 20, duration: 400 }} class="space-y-6 pt-4">
+							{#if identityLocked}
+								<div
+									class="flex items-start gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-4 text-xs leading-relaxed text-yellow-200/80"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="18"
+										height="18"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										class="mt-0.5 shrink-0"
+										><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path
+											d="M7 11V7a5 5 0 0 1 10 0v4"
+										/></svg
+									>
+									<span>
+										Network Member Type, Primary Industry, and Graduation Batch are locked
+										after faculty verification. Contact a Superadmin if a correction is
+										required.
+									</span>
+								</div>
+							{/if}
+
 							<!-- User Type Toggle -->
 							<div class="space-y-2">
 								<label class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
 									>Network Member Type</label
 								>
-								<div class="flex w-fit rounded-2xl border border-white/5 bg-neutral-950 p-1">
+								<div
+									class="flex w-fit rounded-2xl border border-white/5 bg-neutral-950 p-1 {identityLocked
+										? 'opacity-60'
+										: ''}"
+								>
 									<button
+										disabled={identityLocked}
 										onclick={() => (editData.userType = 'STUDENT')}
-										class="rounded-xl px-6 py-2 text-xs font-bold transition-all {editData.userType ===
+										class="rounded-xl px-6 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed {editData.userType ===
 										'STUDENT'
 											? 'bg-indigo-500 text-white shadow-lg'
 											: 'text-neutral-500 hover:text-white'}">Student</button
 									>
 									<button
+										disabled={identityLocked}
 										onclick={() => (editData.userType = 'ALUMNI')}
-										class="rounded-xl px-6 py-2 text-xs font-bold transition-all {editData.userType ===
+										class="rounded-xl px-6 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed {editData.userType ===
 										'ALUMNI'
 											? 'bg-indigo-500 text-white shadow-lg'
 											: 'text-neutral-500 hover:text-white'}">Alumnus</button
@@ -172,9 +212,10 @@
 									>
 									<input
 										id="industry"
+										readonly={identityLocked}
 										bind:value={editData.industry}
 										placeholder="e.g. Software Engineering"
-										class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500"
+										class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500 read-only:cursor-not-allowed read-only:opacity-60"
 									/>
 								</div>
 								<div class="space-y-2">
@@ -185,9 +226,10 @@
 									>
 									<input
 										id="batch"
+										readonly={identityLocked}
 										bind:value={editData.batch}
 										placeholder="e.g. 2020"
-										class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500"
+										class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500 read-only:cursor-not-allowed read-only:opacity-60"
 									/>
 								</div>
 							</div>

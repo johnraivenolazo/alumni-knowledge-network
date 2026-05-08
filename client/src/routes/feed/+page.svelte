@@ -4,7 +4,7 @@
 	import { api } from '$lib/api';
 	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
 	import { goto } from '$app/navigation';
-	import type { Post, Comment, PostReaction, ReactionType } from '$lib/types';
+	import { displayUserType, userTypeBadgeClass, type Post, type Comment, type PostReaction, type ReactionType } from '$lib/types';
 
 	let posts = $state<Post[]>([]);
 	let loading = $state(true);
@@ -311,6 +311,15 @@
 											>
 										{/if}
 									</div>
+									{#if displayUserType(post.author)}
+										<span
+											class="mt-1.5 inline-block rounded-full border px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] uppercase {userTypeBadgeClass(
+												post.author
+											)}"
+										>
+											{displayUserType(post.author)}
+										</span>
+									{/if}
 									<p class="mt-1 text-sm text-neutral-500">
 										{post.author?.industry || 'General'} •
 										<span class="text-[10px] font-bold tracking-widest uppercase"

@@ -3,12 +3,17 @@
 	import { fly, fade, slide } from 'svelte/transition';
 	import { api } from '$lib/api';
 	import { user, isAuthenticated } from '$lib/authService';
-	import { type User, type MentorshipRequest, displayUserType } from '$lib/types';
+	import {
+		type User,
+		type MentorshipRequest,
+		displayUserType,
+		userTypeBadgeClass
+	} from '$lib/types';
 	import ChatWindow from '$lib/components/chat/ChatWindow.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let requests = $state<MentorshipRequest[]>([]);
-	let alumniList = $state<User[]>([]);
+	let alumniPool = $state<User[]>([]);
 
 	let filterQuery = $state('');
 	let filterIndustry = $state('');
@@ -19,19 +24,15 @@
 	let activeChatRequest = $state<MentorshipRequest | null>(null);
 	let loading = $state(true);
 
-	let searchTimeout: ReturnType<typeof setTimeout>;
-
 	async function loadData() {
 		loading = true;
 		try {
 			const [reqs, alums] = await Promise.all([
 				api.get('/mentorship/my-requests'),
-				api.get(
-					`/users?userType=ALUMNI&status=APPROVED&search=${encodeURIComponent(filterQuery)}&industry=${encodeURIComponent(filterIndustry)}&batch=${encodeURIComponent(filterBatch)}`
-				)
+				api.get('/users?userType=ALUMNI&status=APPROVED')
 			]);
 			requests = reqs;
-			alumniList = alums;
+			alumniPool = alums;
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -39,12 +40,51 @@
 		}
 	}
 
-	function handleSearch() {
-		clearTimeout(searchTimeout);
-		searchTimeout = setTimeout(() => {
-			loadData();
-		}, 400);
+	// Relevance score for fuzzy name search.
+	// Higher = better match. 0 means no match (filtered out).
+	// Tiers: exact > prefix > word-boundary > substring > subsequence.
+	function scoreName(name: string, query: string): number {
+		if (!query) return 1;
+		const n = name.toLowerCase();
+		const q = query.toLowerCase().trim();
+		if (!q) return 1;
+		if (n === q) return 1000;
+		if (n.startsWith(q)) return 700 - (n.length - q.length);
+		const wordBoundary = ` ${n}`.indexOf(` ${q}`);
+		if (wordBoundary >= 0) return 500 - wordBoundary;
+		const sub = n.indexOf(q);
+		if (sub >= 0) return 300 - sub;
+		// Subsequence match: all chars of q appear in n in order.
+		let qi = 0;
+		for (let i = 0; i < n.length && qi < q.length; i++) {
+			if (n[i] === q[qi]) qi++;
+		}
+		if (qi === q.length) return 100 - (n.length - q.length);
+		return 0;
 	}
+
+	const industryOptions = $derived(
+		Array.from(new Set(alumniPool.map((a) => a.industry).filter((v): v is string => !!v))).sort(
+			(a, b) => a.localeCompare(b)
+		)
+	);
+
+	const batchOptions = $derived(
+		Array.from(new Set(alumniPool.map((a) => a.batch).filter((v): v is string => !!v))).sort(
+			(a, b) => b.localeCompare(a)
+		)
+	);
+
+	const alumniList = $derived(
+		alumniPool
+			.filter((a) => a.id !== $user?.id)
+			.filter((a) => !filterIndustry || a.industry === filterIndustry)
+			.filter((a) => !filterBatch || a.batch === filterBatch)
+			.map((a) => ({ alum: a, score: scoreName(a.name || '', filterQuery) }))
+			.filter((x) => x.score > 0)
+			.sort((a, b) => b.score - a.score)
+			.map((x) => x.alum)
+	);
 
 	async function sendRequest() {
 		if (!selectedAlumni) return;
@@ -128,8 +168,15 @@
 								</div>
 								<div>
 									<h3 class="text-xl font-medium text-white">{partner.name}</h3>
+									<span
+										class="mt-1.5 inline-block rounded-full border px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] uppercase {userTypeBadgeClass(
+											partner
+										)}"
+									>
+										{displayUserType(partner)}
+									</span>
 									<p class="mt-1 text-sm text-neutral-500">
-										{partner.industry || 'General'} • {displayUserType(partner)}
+										{partner.industry || 'General'}
 									</p>
 								</div>
 							</div>
@@ -187,8 +234,17 @@
 							{@const isSender = req.studentId === $user?.id}
 							{@const partner = isSender ? req.alumni : req.student}
 							<div class="border-b border-white/5 py-8">
-								<div class="mb-4 flex items-start justify-between">
-									<h3 class="text-lg font-medium text-white">{partner.name}</h3>
+								<div class="mb-4 flex items-start justify-between gap-3">
+									<div>
+										<h3 class="text-lg font-medium text-white">{partner.name}</h3>
+										<span
+											class="mt-1.5 inline-block rounded-full border px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] uppercase {userTypeBadgeClass(
+												partner
+											)}"
+										>
+											{displayUserType(partner)}
+										</span>
+									</div>
 									<span class="text-[10px] font-bold tracking-widest text-neutral-600 uppercase">
 										{isSender ? 'Sent' : 'Received'}
 									</span>
@@ -240,31 +296,66 @@
 					<div class="relative w-full">
 						<input
 							bind:value={filterQuery}
-							oninput={handleSearch}
-							placeholder="Search names or bios..."
+							placeholder="Search by name..."
 							class="w-full border-b border-white/10 bg-transparent pt-4 pb-3 text-sm text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
 						/>
 					</div>
 					<div class="relative w-full sm:w-1/3">
-						<input
+						<select
 							bind:value={filterIndustry}
-							oninput={handleSearch}
-							placeholder="Industry..."
-							class="w-full border-b border-white/10 bg-transparent pt-4 pb-3 text-sm text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
-						/>
+							class="w-full appearance-none border-b border-white/10 bg-transparent pt-4 pb-3 pr-6 text-sm text-white transition-colors focus:border-white focus:outline-none"
+						>
+							<option value="" class="bg-neutral-950">All industries</option>
+							{#each industryOptions as ind (ind)}
+								<option value={ind} class="bg-neutral-950">{ind}</option>
+							{/each}
+						</select>
+						<div
+							class="pointer-events-none absolute right-0 bottom-3.5 text-neutral-600"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="12"
+								height="12"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
+							>
+						</div>
 					</div>
 					<div class="relative w-full sm:w-1/4">
-						<input
+						<select
 							bind:value={filterBatch}
-							oninput={handleSearch}
-							placeholder="Batch..."
-							class="w-full border-b border-white/10 bg-transparent pt-4 pb-3 text-sm text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
-						/>
+							class="w-full appearance-none border-b border-white/10 bg-transparent pt-4 pb-3 pr-6 text-sm text-white transition-colors focus:border-white focus:outline-none"
+						>
+							<option value="" class="bg-neutral-950">All batches</option>
+							{#each batchOptions as yr (yr)}
+								<option value={yr} class="bg-neutral-950">{yr}</option>
+							{/each}
+						</select>
+						<div
+							class="pointer-events-none absolute right-0 bottom-3.5 text-neutral-600"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="12"
+								height="12"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
+							>
+						</div>
 					</div>
 				</div>
 
 				<div class="flex flex-col border-t border-white/10">
-					{#if loading && alumniList.length === 0}
+					{#if loading && alumniPool.length === 0}
 						{#each Array(4) as _, i (i)}
 							<div class="flex items-center gap-6 border-b border-white/5 py-6">
 								<Skeleton class="h-12 w-12 rounded-full" />
@@ -275,7 +366,7 @@
 							</div>
 						{/each}
 					{:else}
-						{#each alumniList.filter((a) => a.id !== $user?.id) as alum (alum.id)}
+						{#each alumniList as alum (alum.id)}
 							{@const status = getAlumniStatus(alum.id)}
 							<div
 								class="group -mx-4 flex flex-col justify-between gap-4 border-b border-white/5 px-4 py-6 transition-colors hover:bg-white/[0.02] sm:flex-row sm:items-center"
@@ -304,6 +395,13 @@
 												>
 											{/if}
 										</div>
+										<span
+											class="mt-1.5 inline-block rounded-full border px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] uppercase {userTypeBadgeClass(
+												alum
+											)}"
+										>
+											{displayUserType(alum) || 'ALUMNUS'}
+										</span>
 										<p class="mt-1 text-sm text-neutral-500">
 											{alum.industry || 'General'} • {alum.batch
 												? `Batch ${alum.batch}`

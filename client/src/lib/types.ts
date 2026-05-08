@@ -5,7 +5,22 @@ export type UserType = 'STUDENT' | 'ALUMNI';
 export function displayUserType(u?: { role?: Role; userType?: UserType } | null): string {
 	if (!u) return '';
 	if (u.role === 'ADMIN' || u.role === 'SUPERADMIN') return 'STAFF';
+	if (u.userType === 'ALUMNI') return 'ALUMNUS';
 	return u.userType || '';
+}
+
+export function userTypeBadgeClass(u?: { role?: Role; userType?: UserType } | null): string {
+	const label = displayUserType(u);
+	switch (label) {
+		case 'STAFF':
+			return 'border-red-500/40 bg-red-500/15 text-red-300';
+		case 'STUDENT':
+			return 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300';
+		case 'ALUMNUS':
+			return 'border-yellow-500/40 bg-yellow-500/15 text-yellow-300';
+		default:
+			return 'border-white/10 bg-white/5 text-neutral-400';
+	}
 }
 
 export interface User {
