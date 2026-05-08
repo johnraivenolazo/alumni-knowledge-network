@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly SUPERADMIN_EMAILS = [
     'jcesperanza@neu.edu.ph',
     'johnraivenolazo@gmail.com',
-    'bgduque@neu.edu.ph',
+    'borisgamaliel.duque@neu.edu.ph',
     'olazoraiven@gmail.com',
     'raivenolazo@gmail.com',
   ];

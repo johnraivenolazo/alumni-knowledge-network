@@ -12,7 +12,7 @@ export class MentorshipService {
   private sesClient: SESClient;
   private readonly SUPERADMIN_EMAILS = [
     'olazoraiven@gmail.com',
-    'bgduque@neu.edu.ph',
+    'borisgamaliel.duque@neu.edu.ph',
     'raivenolazo@gmail.com',
     'johnraivenolazo@gmail.com',
   ];
