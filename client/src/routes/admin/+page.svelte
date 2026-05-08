@@ -246,27 +246,24 @@
 			<!-- Engagement Analytics -->
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 				<!-- Post Lividity -->
-				<div
-					class="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-500/20 via-pink-500/10 to-fuchsia-500/20 p-6"
-				>
-					<div class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-rose-500/30 blur-2xl"></div>
-					<p class="text-[10px] font-bold tracking-widest text-rose-200 uppercase">
+				<div class="rounded-2xl border border-white/5 bg-neutral-900/50 p-6">
+					<p class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
 						Post Lividity
 					</p>
 					{#if loading}
 						<Skeleton class="mt-3 h-10 w-20" />
 					{:else}
 						<p class="mt-2 text-4xl font-black tracking-tighter text-white">
-							{stats?.postLividity ?? 0}<span class="text-2xl text-rose-200/70">%</span>
+							{stats?.postLividity ?? 0}<span class="text-2xl text-neutral-500">%</span>
 						</p>
-						<p class="mt-2 text-xs text-rose-100/70">
+						<p class="mt-2 text-xs text-neutral-500">
 							{stats?.postsLast7Days ?? 0} posts in last 7 days
 						</p>
 						<div class="mt-4 flex h-10 items-end gap-1">
 							{#each stats?.postsByDay || [] as d (d.day)}
 								{@const max = Math.max(1, ...(stats?.postsByDay || []).map((x) => x.count))}
 								<div
-									class="flex-1 rounded-t bg-gradient-to-t from-rose-500 to-pink-300"
+									class="flex-1 rounded-t bg-white/20"
 									style="height: {(d.count / max) * 100}%; min-height: 2px;"
 									title="{d.day}: {d.count}"
 								></div>
@@ -276,25 +273,20 @@
 				</div>
 
 				<!-- Alumni Consistency -->
-				<div
-					class="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-yellow-500/20 p-6"
-				>
-					<div
-						class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-amber-500/30 blur-2xl"
-					></div>
-					<p class="text-[10px] font-bold tracking-widest text-amber-200 uppercase">
+				<div class="rounded-2xl border border-white/5 bg-neutral-900/50 p-6">
+					<p class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
 						Alumni's Consistency
 					</p>
 					{#if loading}
 						<Skeleton class="mt-3 h-10 w-20" />
 					{:else}
 						<p class="mt-2 text-4xl font-black tracking-tighter text-white">
-							{stats?.alumniConsistency ?? 0}<span class="text-2xl text-amber-200/70">%</span>
+							{stats?.alumniConsistency ?? 0}<span class="text-2xl text-neutral-500">%</span>
 						</p>
-						<p class="mt-2 text-xs text-amber-100/70">posted in the last week</p>
-						<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-amber-900/40">
+						<p class="mt-2 text-xs text-neutral-500">posted in the last week</p>
+						<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-neutral-800">
 							<div
-								class="h-full rounded-full bg-gradient-to-r from-amber-400 to-yellow-300"
+								class="h-full rounded-full bg-white/20"
 								style="width: {stats?.alumniConsistency ?? 0}%"
 							></div>
 						</div>
@@ -302,25 +294,20 @@
 				</div>
 
 				<!-- Student Consistency -->
-				<div
-					class="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20 p-6"
-				>
-					<div
-						class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-emerald-500/30 blur-2xl"
-					></div>
-					<p class="text-[10px] font-bold tracking-widest text-emerald-200 uppercase">
+				<div class="rounded-2xl border border-white/5 bg-neutral-900/50 p-6">
+					<p class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
 						Student's Consistency
 					</p>
 					{#if loading}
 						<Skeleton class="mt-3 h-10 w-20" />
 					{:else}
 						<p class="mt-2 text-4xl font-black tracking-tighter text-white">
-							{stats?.studentConsistency ?? 0}<span class="text-2xl text-emerald-200/70">%</span>
+							{stats?.studentConsistency ?? 0}<span class="text-2xl text-neutral-500">%</span>
 						</p>
-						<p class="mt-2 text-xs text-emerald-100/70">posted in the last week</p>
-						<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-emerald-900/40">
+						<p class="mt-2 text-xs text-neutral-500">posted in the last week</p>
+						<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-neutral-800">
 							<div
-								class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300"
+								class="h-full rounded-full bg-white/20"
 								style="width: {stats?.studentConsistency ?? 0}%"
 							></div>
 						</div>
@@ -328,13 +315,8 @@
 				</div>
 
 				<!-- Most Used Interaction -->
-				<div
-					class="relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/20 via-violet-500/10 to-purple-500/20 p-6"
-				>
-					<div
-						class="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-indigo-500/30 blur-2xl"
-					></div>
-					<p class="text-[10px] font-bold tracking-widest text-indigo-200 uppercase">
+				<div class="rounded-2xl border border-white/5 bg-neutral-900/50 p-6">
+					<p class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
 						Most Used Interaction
 					</p>
 					{#if loading}
@@ -349,7 +331,7 @@
 								<p class="text-2xl font-black tracking-tight text-white">
 									{top.type.charAt(0) + top.type.slice(1).toLowerCase()}
 								</p>
-								<p class="text-xs text-indigo-100/70">{top.count} reactions</p>
+								<p class="text-xs text-neutral-500">{top.count} reactions</p>
 							</div>
 						</div>
 						<div class="mt-4 space-y-2">
@@ -361,18 +343,18 @@
 								)}
 								<div class="flex items-center gap-2 text-xs">
 									<span class="w-5">{e}</span>
-									<div class="h-1.5 flex-1 overflow-hidden rounded-full bg-indigo-900/40">
+									<div class="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-800">
 										<div
-											class="h-full rounded-full bg-gradient-to-r from-indigo-400 to-violet-300"
+											class="h-full rounded-full bg-white/20"
 											style="width: {(r.count / max) * 100}%"
 										></div>
 									</div>
-									<span class="w-8 text-right text-indigo-100/80">{r.count}</span>
+									<span class="w-8 text-right text-neutral-400">{r.count}</span>
 								</div>
 							{/each}
 						</div>
 					{:else}
-						<p class="mt-3 text-sm text-indigo-100/70 italic">No reactions yet</p>
+						<p class="mt-3 text-sm text-neutral-500 italic">No reactions yet</p>
 					{/if}
 				</div>
 			</div>
@@ -546,7 +528,7 @@
 							resetNewUser();
 							creatingUser = true;
 						}}
-						class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:from-emerald-400 hover:to-teal-400 active:scale-95"
+						class="rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-black transition-all hover:bg-neutral-200 active:scale-95"
 					>
 						+ New User
 					</button>
@@ -881,12 +863,12 @@
 		out:fade={{ duration: 150 }}
 	>
 		<div
-			class="w-full max-w-md overflow-hidden rounded-2xl border border-emerald-500/20 bg-neutral-900 shadow-2xl"
+			class="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-neutral-900 shadow-2xl"
 			in:fly={{ y: 20, duration: 200 }}
 			out:fly={{ y: 20, duration: 200 }}
 		>
 			<div
-				class="flex items-center justify-between border-b border-white/5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 px-6 py-4"
+				class="flex items-center justify-between border-b border-white/5 bg-white/5 px-6 py-4"
 			>
 				<h3 class="text-lg font-bold text-white">Create New User</h3>
 				<button
@@ -921,7 +903,7 @@
 						type="email"
 						bind:value={newUser.email}
 						placeholder="user@neu.edu.ph"
-						class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+						class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-white/20 focus:outline-none"
 					/>
 				</div>
 				<div>
@@ -935,7 +917,7 @@
 						type="text"
 						bind:value={newUser.name}
 						placeholder="Full Name"
-						class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+						class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-white/20 focus:outline-none"
 					/>
 				</div>
 				<div class="grid grid-cols-2 gap-4">
@@ -948,7 +930,7 @@
 						<select
 							id="new-user-role"
 							bind:value={newUser.role}
-							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-emerald-500/40 focus:outline-none"
+							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
 						>
 							<option value="USER">User</option>
 							<option value="ADMIN">Admin</option>
@@ -964,7 +946,7 @@
 						<select
 							id="new-user-type"
 							bind:value={newUser.userType}
-							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-emerald-500/40 focus:outline-none"
+							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
 						>
 							<option value="STUDENT">Student</option>
 							<option value="ALUMNI">Alumni</option>
@@ -983,7 +965,7 @@
 							type="text"
 							bind:value={newUser.industry}
 							placeholder="e.g. Tech"
-							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-white/20 focus:outline-none"
 						/>
 					</div>
 					<div>
@@ -997,7 +979,7 @@
 							type="text"
 							bind:value={newUser.batch}
 							placeholder="e.g. 2024"
-							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-emerald-500/40 focus:outline-none"
+							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-white/20 focus:outline-none"
 						/>
 					</div>
 				</div>
@@ -1018,7 +1000,7 @@
 				<button
 					onclick={handleCreateUser}
 					disabled={createSubmitting}
-					class="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-3 text-[10px] font-bold tracking-widest text-white uppercase shadow-lg shadow-emerald-500/20 transition-all hover:from-emerald-400 hover:to-teal-400 active:scale-95 disabled:opacity-50"
+					class="rounded-lg bg-white px-8 py-3 text-[10px] font-bold tracking-widest text-black uppercase transition-all hover:bg-neutral-200 active:scale-95 disabled:opacity-50"
 				>
 					{createSubmitting ? 'Creating...' : 'Create User'}
 				</button>
