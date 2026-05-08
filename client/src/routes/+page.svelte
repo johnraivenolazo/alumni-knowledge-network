@@ -56,30 +56,6 @@
 		</div>
 	</div>
 
-	<!-- Features / Stats -->
-	<div class="mx-auto max-w-7xl px-6 pb-32 lg:px-8">
-		<dl class="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
-			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
-				<dt class="text-base leading-7 text-neutral-400">Verified Alumni</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-					500+
-				</dd>
-			</div>
-			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
-				<dt class="text-base leading-7 text-neutral-400">Mentorship Pairs</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-					1.2k
-				</dd>
-			</div>
-			<div class="mx-auto flex max-w-xs flex-col gap-y-4">
-				<dt class="text-base leading-7 text-neutral-400">Success Rate</dt>
-				<dd class="order-first text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-					98%
-				</dd>
-			</div>
-		</dl>
-	</div>
-
 	<!-- About / SECI Model Section -->
 	<div id="about" class="mx-auto max-w-7xl scroll-mt-24 px-6 pb-32 lg:px-8">
 		<div class="mx-auto max-w-2xl text-center">
