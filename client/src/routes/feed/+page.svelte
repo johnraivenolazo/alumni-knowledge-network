@@ -57,10 +57,10 @@
 		}
 	}
 
-	const REACTIONS: { type: ReactionType; label: string; emoji: string; color: string }[] = [
-		{ type: 'WOW', label: 'Wow', emoji: '😮', color: 'text-amber-300' },
-		{ type: 'HELPFUL', label: 'Helpful', emoji: '🤝', color: 'text-emerald-300' },
-		{ type: 'INSIGHTFUL', label: 'Insightful', emoji: '💡', color: 'text-sky-300' }
+	const REACTIONS: { type: ReactionType; label: string; emoji: string }[] = [
+		{ type: 'WOW', label: 'Wow', emoji: '😮' },
+		{ type: 'HELPFUL', label: 'Helpful', emoji: '🤝' },
+		{ type: 'INSIGHTFUL', label: 'Insightful', emoji: '💡' }
 	];
 
 	let openReactionPicker = $state<string | null>(null);
@@ -355,7 +355,7 @@
 										<button
 											onclick={() => (openReactionPicker = openReactionPicker === p.id ? null : p.id)}
 											class="flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold tracking-wide uppercase transition-all {mine
-												? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-300'
+												? 'border-white/30 bg-white/10 text-white'
 												: 'border-white/10 bg-white/5 text-neutral-400 hover:border-white/20 hover:bg-white/10 hover:text-white'}"
 										>
 											{#if mine}
@@ -375,7 +375,7 @@
 													<button
 														onclick={() => handleReact(p.id, r.type)}
 														title={r.label}
-														class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all hover:scale-110 hover:bg-white/10 {r.color}"
+														class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-neutral-300 transition-all hover:scale-110 hover:bg-white/10 hover:text-white"
 													>
 														<span class="text-base">{r.emoji}</span>
 														<span class="hidden sm:inline">{r.label}</span>
@@ -392,7 +392,7 @@
 														class="flex items-center gap-1 rounded-full border border-white/5 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-neutral-300"
 													>
 														<span>{r.emoji}</span>
-														<span class="{r.color}">{counts[r.type]}</span>
+														<span>{counts[r.type]}</span>
 													</span>
 												{/if}
 											{/each}

@@ -33,6 +33,11 @@ async function request(path: string, method = 'GET', body?: any) {
 			window.location.href = '/banned';
 		}
 
+		// Stale/unresolvable token — force a re-login instead of leaving the user stranded.
+		if (res.status === 401) {
+			window.location.href = '/login';
+		}
+
 		const customError = new Error(errorMessage) as any;
 		customError.status = res.status;
 		customError.responseBody = errorBody;
