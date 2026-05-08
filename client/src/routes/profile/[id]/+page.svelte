@@ -12,7 +12,7 @@
 	let isEditing = $state(false);
 	let editData = $state({ bio: '', industry: '', batch: '', userType: 'STUDENT' as UserType });
 	let isMyProfile = $derived(page.params.id === 'me' || profileUser?.id === $user?.id);
-	let identityLocked = $derived(profileUser?.status === 'APPROVED');
+	let canEditIdentity = $derived($user?.role === 'SUPERADMIN');
 
 	async function loadProfile() {
 		try {
@@ -34,7 +34,7 @@
 	async function handleUpdate() {
 		try {
 			const payload: Record<string, unknown> = { bio: editData.bio };
-			if (!identityLocked) {
+			if (canEditIdentity) {
 				payload.userType = editData.userType;
 				payload.industry = editData.industry;
 				payload.batch = editData.batch;
@@ -147,92 +147,88 @@
 
 					{#if isEditing}
 						<div in:fly={{ y: 20, duration: 400 }} class="space-y-6 pt-4">
-							{#if identityLocked}
-								<div
-									class="flex items-start gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-4 text-xs leading-relaxed text-yellow-200/80"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="18"
-										height="18"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										class="mt-0.5 shrink-0"
-										><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path
-											d="M7 11V7a5 5 0 0 1 10 0v4"
-										/></svg
+							{#if canEditIdentity}
+								<!-- User Type Toggle (Superadmin only) -->
+								<div class="space-y-2">
+									<label class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
+										>Network Member Type</label
 									>
-									<span>
-										Network Member Type, Primary Industry, and Graduation Batch are locked
-										after faculty verification. Contact a Superadmin if a correction is
-										required.
-									</span>
+									<div class="flex w-fit rounded-2xl border border-white/5 bg-neutral-950 p-1">
+										<button
+											onclick={() => (editData.userType = 'STUDENT')}
+											class="rounded-xl px-6 py-2 text-xs font-bold transition-all {editData.userType ===
+											'STUDENT'
+												? 'bg-indigo-500 text-white shadow-lg'
+												: 'text-neutral-500 hover:text-white'}">Student</button
+										>
+										<button
+											onclick={() => (editData.userType = 'ALUMNI')}
+											class="rounded-xl px-6 py-2 text-xs font-bold transition-all {editData.userType ===
+											'ALUMNI'
+												? 'bg-indigo-500 text-white shadow-lg'
+												: 'text-neutral-500 hover:text-white'}">Alumnus</button
+										>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+									<div class="space-y-2">
+										<label
+											for="industry"
+											class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
+											>Primary Industry</label
+										>
+										<input
+											id="industry"
+											bind:value={editData.industry}
+											placeholder="e.g. Software Engineering"
+											class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500"
+										/>
+									</div>
+									<div class="space-y-2">
+										<label
+											for="batch"
+											class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
+											>Graduation Batch</label
+										>
+										<input
+											id="batch"
+											bind:value={editData.batch}
+											placeholder="e.g. 2020"
+											class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500"
+										/>
+									</div>
+								</div>
+							{:else}
+								<!-- Read-only identity fields for non-superadmins -->
+								<div class="space-y-2">
+									<p class="text-[10px] font-black tracking-widest text-neutral-500 uppercase">
+										Network Member Type
+									</p>
+									<p class="text-lg font-bold text-neutral-200">
+										{displayUserType(profileUser) || 'STUDENT'}
+									</p>
+								</div>
+
+								<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+									<div class="space-y-2">
+										<p class="text-[10px] font-black tracking-widest text-neutral-500 uppercase">
+											Primary Industry
+										</p>
+										<p class="text-lg font-bold text-neutral-200">
+											{profileUser.industry || 'Not specified'}
+										</p>
+									</div>
+									<div class="space-y-2">
+										<p class="text-[10px] font-black tracking-widest text-neutral-500 uppercase">
+											Graduation Batch
+										</p>
+										<p class="text-lg font-bold text-neutral-200">
+											{profileUser.batch || 'Not specified'}
+										</p>
+									</div>
 								</div>
 							{/if}
-
-							<!-- User Type Toggle -->
-							<div class="space-y-2">
-								<label class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
-									>Network Member Type</label
-								>
-								<div
-									class="flex w-fit rounded-2xl border border-white/5 bg-neutral-950 p-1 {identityLocked
-										? 'opacity-60'
-										: ''}"
-								>
-									<button
-										disabled={identityLocked}
-										onclick={() => (editData.userType = 'STUDENT')}
-										class="rounded-xl px-6 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed {editData.userType ===
-										'STUDENT'
-											? 'bg-indigo-500 text-white shadow-lg'
-											: 'text-neutral-500 hover:text-white'}">Student</button
-									>
-									<button
-										disabled={identityLocked}
-										onclick={() => (editData.userType = 'ALUMNI')}
-										class="rounded-xl px-6 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed {editData.userType ===
-										'ALUMNI'
-											? 'bg-indigo-500 text-white shadow-lg'
-											: 'text-neutral-500 hover:text-white'}">Alumnus</button
-									>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-								<div class="space-y-2">
-									<label
-										for="industry"
-										class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
-										>Primary Industry</label
-									>
-									<input
-										id="industry"
-										readonly={identityLocked}
-										bind:value={editData.industry}
-										placeholder="e.g. Software Engineering"
-										class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500 read-only:cursor-not-allowed read-only:opacity-60"
-									/>
-								</div>
-								<div class="space-y-2">
-									<label
-										for="batch"
-										class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
-										>Graduation Batch</label
-									>
-									<input
-										id="batch"
-										readonly={identityLocked}
-										bind:value={editData.batch}
-										placeholder="e.g. 2020"
-										class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500 read-only:cursor-not-allowed read-only:opacity-60"
-									/>
-								</div>
-							</div>
 
 							<div class="space-y-2">
 								<label
