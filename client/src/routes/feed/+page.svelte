@@ -4,7 +4,16 @@
 	import { api } from '$lib/api';
 	import { isAuthenticated, user, loading as authLoading } from '$lib/authService';
 	import { goto } from '$app/navigation';
-	import { displayUserType, userTypeBadgeClass, type Post, type Comment, type PostReaction, type ReactionType } from '$lib/types';
+	import {
+		displayUserType,
+		userTypeBadgeClass,
+		categoryBadgeClass,
+		type Post,
+		type Comment,
+		type PostReaction,
+		type ReactionType
+	} from '$lib/types';
+	import ThemedSelect from '$lib/components/ThemedSelect.svelte';
 
 	let posts = $state<Post[]>([]);
 	let loading = $state(true);
@@ -194,34 +203,19 @@
 				</button>
 			{:else}
 				<div transition:fly={{ y: 20, duration: 300 }}>
-					<div class="flex items-center justify-between">
+					<div class="flex items-center justify-between gap-4">
 						<h2 class="text-[10px] font-bold tracking-widest text-neutral-500 uppercase">
 							Share Expertise
 						</h2>
-						<div class="relative">
-							<select
+						<div class="w-44">
+							<ThemedSelect
 								bind:value={newPost.category}
-								class="appearance-none bg-transparent pr-4 text-[10px] font-bold tracking-widest text-neutral-500 uppercase transition-colors outline-none focus:text-white"
-							>
-								{#each categories.filter((c) => c !== 'All') as cat (cat)}
-									<option value={cat} class="bg-neutral-900">{cat}</option>
-								{/each}
-							</select>
-							<div
-								class="pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 text-neutral-600"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="10"
-									height="10"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="3"
-									stroke-linecap="round"
-									stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
-								>
-							</div>
+								size="sm"
+								ariaLabel="Post category"
+								options={categories
+									.filter((c) => c !== 'All')
+									.map((c) => ({ value: c, label: c }))}
+							/>
 						</div>
 					</div>
 
@@ -318,14 +312,16 @@
 													post.author
 												)}"
 											>
-												({displayUserType(post.author)})
+												{displayUserType(post.author)}
 											</span>
 										{/if}
 										{#if post.category}
 											<span
-												class="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] text-neutral-300 uppercase"
+												class="rounded-full border px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] uppercase {categoryBadgeClass(
+													post.category
+												)}"
 											>
-												({post.category})
+												{post.category}
 											</span>
 										{/if}
 									</div>

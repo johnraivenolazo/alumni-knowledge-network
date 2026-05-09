@@ -6,6 +6,7 @@
 	import { user } from '$lib/authService';
 	import { type User, type UserType, displayUserType, userTypeBadgeClass } from '$lib/types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import IndustrySelect from '$lib/components/IndustrySelect.svelte';
 
 	let profileUser = $state<User | null>(null);
 	let loading = $state(true);
@@ -81,30 +82,48 @@
 		avatarUploading = true;
 		avatarError = '';
 		try {
-			const { url, publicUrl } = await api.post('/users/profile-pic-upload', {
+			const dataBase64 = await fileToBase64(file);
+			const { publicUrl } = await api.post('/users/profile-pic-upload', {
 				fileName: file.name,
-				contentType: file.type
+				contentType: file.type,
+				dataBase64
 			});
 
-			const putRes = await fetch(url, {
-				method: 'PUT',
-				headers: { 'Content-Type': file.type },
-				body: file
-			});
-			if (!putRes.ok) {
-				throw new Error(`Upload failed (${putRes.status})`);
-			}
-
-			const updated = await api.patch('/users/me', { profilePic: publicUrl });
+			const absoluteUrl = toAbsoluteUploadUrl(publicUrl);
+			const updated = await api.patch('/users/me', { profilePic: absoluteUrl });
 			profileUser = { ...profileUser, ...updated };
 			if (isMyProfile) {
-				user.update((u) => (u ? { ...u, profilePic: publicUrl } : u));
+				user.update((u) => (u ? { ...u, profilePic: absoluteUrl } : u));
 			}
 		} catch (e) {
 			avatarError = (e as Error).message || 'Failed to upload photo.';
 		} finally {
 			avatarUploading = false;
 		}
+	}
+
+	function fileToBase64(file: File): Promise<string> {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => {
+				const result = reader.result as string;
+				// Strip "data:image/png;base64," — server expects raw base64.
+				const idx = result.indexOf(',');
+				resolve(idx >= 0 ? result.slice(idx + 1) : result);
+			};
+			reader.onerror = () => reject(reader.error || new Error('Read failed'));
+			reader.readAsDataURL(file);
+		});
+	}
+
+	// Local-storage fallback returns a relative `/uploads/...` URL because the
+	// server doesn't know its own public origin. Resolve it against the API
+	// base so the resulting URL is portable across pages.
+	function toAbsoluteUploadUrl(url: string): string {
+		if (!url || /^https?:\/\//i.test(url)) return url;
+		const apiBase = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3000/api';
+		const origin = apiBase.replace(/\/api\/?$/, '');
+		return `${origin}${url.startsWith('/') ? '' : '/'}${url}`;
 	}
 
 	onMount(loadProfile);
@@ -229,15 +248,13 @@
 								{profileUser.name || 'Anonymous User'}
 							</h1>
 							<div class="flex flex-wrap items-center gap-2">
-								{#if !isSuperadminProfile}
-									<span
-										class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase {userTypeBadgeClass(
-											profileUser
-										)}"
-									>
-										{displayUserType(profileUser) || 'STUDENT'}
-									</span>
-								{/if}
+								<span
+									class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase {userTypeBadgeClass(
+										profileUser
+									)}"
+								>
+									{displayUserType(profileUser) || 'STUDENT'}
+								</span>
 								<span
 									class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase
 									{profileUser.role === 'SUPERADMIN'
@@ -302,11 +319,10 @@
 											class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
 											>Primary Industry</label
 										>
-										<input
+										<IndustrySelect
 											id="industry"
 											bind:value={editData.industry}
-											placeholder="e.g. Software Engineering"
-											class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500"
+											placeholder="Search GICS sectors (e.g. Information Technology)"
 										/>
 									</div>
 									<div class="space-y-2">
@@ -319,7 +335,7 @@
 											id="batch"
 											bind:value={editData.batch}
 											placeholder="e.g. 2020"
-											class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-3 text-white outline-none focus:border-indigo-500"
+											class="w-full rounded-2xl border border-white/10 bg-neutral-950 px-6 py-3 text-white shadow-inner shadow-black/40 transition-all outline-none focus:border-red-500/60 focus:ring-2 focus:ring-red-500/20"
 										/>
 									</div>
 								</div>
@@ -365,7 +381,7 @@
 									bind:value={editData.bio}
 									placeholder="Share your story, expertise, or what you're looking for..."
 									rows="4"
-									class="w-full rounded-2xl border border-white/5 bg-neutral-950 px-6 py-4 text-white outline-none focus:border-indigo-500"
+									class="w-full rounded-2xl border border-white/10 bg-neutral-950 px-6 py-4 text-white shadow-inner shadow-black/40 transition-all outline-none focus:border-red-500/60 focus:ring-2 focus:ring-red-500/20"
 								></textarea>
 							</div>
 

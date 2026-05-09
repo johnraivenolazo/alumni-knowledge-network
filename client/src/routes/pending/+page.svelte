@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/api';
+	import IndustrySelect from '$lib/components/IndustrySelect.svelte';
 
 	let userType = $state($user?.userType || 'STUDENT');
 	let industry = $state($user?.industry || '');
@@ -90,12 +91,12 @@
 							<label
 								for="industry"
 								class="mb-2 block text-xs font-bold tracking-widest text-neutral-500 uppercase"
-								>Industry / Course</label
+								>Industry / Sector</label
 							>
-							<input
+							<IndustrySelect
+								id="industry"
 								bind:value={industry}
-								placeholder="e.g. Computer Science"
-								class="w-full border-b border-white/20 bg-transparent py-4 text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
+								placeholder="Search GICS sectors (e.g. Information Technology)"
 							/>
 						</div>
 						<div>
@@ -105,9 +106,10 @@
 								>Batch / Year</label
 							>
 							<input
+								id="batch"
 								bind:value={batch}
 								placeholder="e.g. 2024"
-								class="w-full border-b border-white/20 bg-transparent py-4 text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
+								class="w-full rounded-xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm font-medium text-white placeholder-neutral-600 shadow-inner shadow-black/40 transition-all focus:border-red-500/60 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
 							/>
 						</div>
 					</div>

@@ -7,7 +7,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { Role, User, UserStatus, UserType } from '@akn/database';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
 
 const ALLOWED_IMAGE_MIME: Record<string, string> = {
   png: 'image/png',
@@ -185,16 +186,12 @@ export class UsersService {
     });
   }
 
-  async generatePresignedUrl(
+  async uploadProfilePicture(
     userId: string,
     fileName: string,
-    contentType?: string,
+    contentType: string | undefined,
+    dataBase64: string,
   ) {
-    const bucketName = process.env.AWS_S3_BUCKET;
-    if (!bucketName) {
-      throw new BadRequestException('Profile photo storage is not configured.');
-    }
-
     // Strict allowlist by both extension and MIME. We require BOTH to match
     // because either signal alone is forgeable: a renamed .exe still reports
     // its real MIME, and a hand-crafted upload can lie about MIME while
@@ -211,20 +208,55 @@ export class UsersService {
         'Profile photo content type does not match the file extension.',
       );
     }
+    if (!dataBase64) {
+      throw new BadRequestException('Photo file data is required.');
+    }
+
+    // Strip a possible "data:image/png;base64," prefix before decoding.
+    const cleaned = dataBase64.replace(/^data:[^,]+,/, '');
+    const buffer = Buffer.from(cleaned, 'base64');
+
+    // 5 MiB cap. Larger payloads are nearly always either a mistake or abuse;
+    // profile thumbnails compress well under this even at full resolution.
+    const MAX_BYTES = 5 * 1024 * 1024;
+    if (buffer.length === 0) {
+      throw new BadRequestException('Decoded photo is empty.');
+    }
+    if (buffer.length > MAX_BYTES) {
+      throw new BadRequestException(
+        'Photo is too large. Maximum size is 5 MB.',
+      );
+    }
 
     const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
     const key = `profiles/${userId}/${Date.now()}-${safeName}`;
 
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: key,
-      ContentType: expectedMime,
-    });
+    const bucketName = process.env.AWS_S3_BUCKET;
+    if (bucketName) {
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: key,
+          Body: buffer,
+          ContentType: expectedMime,
+        }),
+      );
+      const region = process.env.AWS_REGION || 'us-east-1';
+      const publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
+      return { publicUrl, key };
+    }
 
-    const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
-    const region = process.env.AWS_REGION || 'us-east-1';
-    const publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
-    return { url, key, publicUrl };
+    // Local fallback: write to <cwd>/uploads/profiles/<userId>/<file> and
+    // surface a URL backed by the static middleware mounted in main.ts.
+    const uploadsRoot = join(process.cwd(), 'uploads');
+    const userDir = join(uploadsRoot, 'profiles', userId);
+    mkdirSync(userDir, { recursive: true });
+    const filePath = join(userDir, `${Date.now()}-${safeName}`);
+    writeFileSync(filePath, buffer);
+
+    const relative = filePath.substring(uploadsRoot.length).replace(/\\/g, '/');
+    const publicUrl = `/uploads${relative}`;
+    return { publicUrl, key };
   }
 
   async findAll(filters?: {

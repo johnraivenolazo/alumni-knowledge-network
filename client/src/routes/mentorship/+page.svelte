@@ -11,6 +11,7 @@
 	} from '$lib/types';
 	import ChatWindow from '$lib/components/chat/ChatWindow.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import ThemedSelect from '$lib/components/ThemedSelect.svelte';
 
 	let requests = $state<MentorshipRequest[]>([]);
 	let alumniPool = $state<User[]>([]);
@@ -300,57 +301,21 @@
 							class="w-full border-b border-white/10 bg-transparent pt-4 pb-3 text-sm text-white placeholder-neutral-600 transition-colors focus:border-white focus:outline-none"
 						/>
 					</div>
-					<div class="relative w-full sm:w-1/3">
-						<select
+					<div class="w-full sm:w-1/3">
+						<ThemedSelect
 							bind:value={filterIndustry}
-							class="w-full appearance-none border-b border-white/10 bg-transparent pt-4 pb-3 pr-6 text-sm text-white transition-colors focus:border-white focus:outline-none"
-						>
-							<option value="" class="bg-neutral-950">All industries</option>
-							{#each industryOptions as ind (ind)}
-								<option value={ind} class="bg-neutral-950">{ind}</option>
-							{/each}
-						</select>
-						<div
-							class="pointer-events-none absolute right-0 bottom-3.5 text-neutral-600"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="12"
-								height="12"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
-							>
-						</div>
+							ariaLabel="Filter by industry"
+							placeholder="All industries"
+							options={industryOptions.map((ind) => ({ value: ind, label: ind }))}
+						/>
 					</div>
-					<div class="relative w-full sm:w-1/4">
-						<select
+					<div class="w-full sm:w-1/4">
+						<ThemedSelect
 							bind:value={filterBatch}
-							class="w-full appearance-none border-b border-white/10 bg-transparent pt-4 pb-3 pr-6 text-sm text-white transition-colors focus:border-white focus:outline-none"
-						>
-							<option value="" class="bg-neutral-950">All batches</option>
-							{#each batchOptions as yr (yr)}
-								<option value={yr} class="bg-neutral-950">{yr}</option>
-							{/each}
-						</select>
-						<div
-							class="pointer-events-none absolute right-0 bottom-3.5 text-neutral-600"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="12"
-								height="12"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
-							>
-						</div>
+							ariaLabel="Filter by batch"
+							placeholder="All batches"
+							options={batchOptions.map((yr) => ({ value: yr, label: yr }))}
+						/>
 					</div>
 				</div>
 

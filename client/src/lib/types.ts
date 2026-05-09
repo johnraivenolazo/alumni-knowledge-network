@@ -23,6 +23,23 @@ export function userTypeBadgeClass(u?: { role?: Role; userType?: UserType } | nu
 	}
 }
 
+export function categoryBadgeClass(category?: string | null): string {
+	switch ((category || '').toLowerCase()) {
+		case 'general':
+			return 'border-sky-500/40 bg-sky-500/15 text-sky-300';
+		case 'tech':
+			return 'border-cyan-500/40 bg-cyan-500/15 text-cyan-300';
+		case 'career':
+			return 'border-amber-500/40 bg-amber-500/15 text-amber-300';
+		case 'mentorship':
+			return 'border-violet-500/40 bg-violet-500/15 text-violet-300';
+		case 'events':
+			return 'border-pink-500/40 bg-pink-500/15 text-pink-300';
+		default:
+			return 'border-white/10 bg-white/5 text-neutral-300';
+	}
+}
+
 export interface User {
 	id: string;
 	name: string;
