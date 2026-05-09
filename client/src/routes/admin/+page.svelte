@@ -6,6 +6,8 @@
 	import { goto } from '$app/navigation';
 	import { type User, type SystemStats, type UserStatus, displayUserType } from '$lib/types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import ThemedSelect from '$lib/components/ThemedSelect.svelte';
+	import IndustrySelect from '$lib/components/IndustrySelect.svelte';
 
 	let activeTab = $state<'overview' | 'pending' | 'users'>('overview');
 	let users = $state<User[]>([]);
@@ -731,30 +733,14 @@
 							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
 							>User Type</label
 						>
-						<div class="relative">
-							<select
-								bind:value={editingUser.userType}
-								class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
-							>
-								<option value="STUDENT">Student</option>
-								<option value="ALUMNI">Alumni</option>
-							</select>
-							<div
-								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-neutral-600"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="12"
-									height="12"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="3"
-									stroke-linecap="round"
-									stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
-								>
-							</div>
-						</div>
+						<ThemedSelect
+							bind:value={editingUser.userType}
+							ariaLabel="User type"
+							options={[
+								{ value: 'STUDENT', label: 'Student' },
+								{ value: 'ALUMNI', label: 'Alumni' }
+							]}
+						/>
 					</div>
 
 					<div>
@@ -762,31 +748,15 @@
 							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
 							>System Role</label
 						>
-						<div class="relative">
-							<select
-								bind:value={editingUser.role}
-								class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
-							>
-								<option value="USER">User</option>
-								<option value="ADMIN">Admin</option>
-								<option value="SUPERADMIN">Superadmin</option>
-							</select>
-							<div
-								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-neutral-600"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="12"
-									height="12"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="3"
-									stroke-linecap="round"
-									stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
-								>
-							</div>
-						</div>
+						<ThemedSelect
+							bind:value={editingUser.role}
+							ariaLabel="System role"
+							options={[
+								{ value: 'USER', label: 'User' },
+								{ value: 'ADMIN', label: 'Admin' },
+								{ value: 'SUPERADMIN', label: 'Superadmin' }
+							]}
+						/>
 					</div>
 
 					{#if editingUser.userType === 'ALUMNI'}
@@ -927,15 +897,16 @@
 							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
 							>Role</label
 						>
-						<select
+						<ThemedSelect
 							id="new-user-role"
 							bind:value={newUser.role}
-							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
-						>
-							<option value="USER">User</option>
-							<option value="ADMIN">Admin</option>
-							<option value="SUPERADMIN">Superadmin</option>
-						</select>
+							ariaLabel="Role"
+							options={[
+								{ value: 'USER', label: 'User' },
+								{ value: 'ADMIN', label: 'Admin' },
+								{ value: 'SUPERADMIN', label: 'Superadmin' }
+							]}
+						/>
 					</div>
 					<div>
 						<label
@@ -943,29 +914,28 @@
 							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
 							>User Type</label
 						>
-						<select
+						<ThemedSelect
 							id="new-user-type"
 							bind:value={newUser.userType}
-							class="w-full appearance-none rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white transition-all focus:border-white/20 focus:outline-none"
-						>
-							<option value="STUDENT">Student</option>
-							<option value="ALUMNI">Alumni</option>
-						</select>
+							ariaLabel="User type"
+							options={[
+								{ value: 'STUDENT', label: 'Student' },
+								{ value: 'ALUMNI', label: 'Alumni' }
+							]}
+						/>
 					</div>
 				</div>
-				<div class="grid grid-cols-2 gap-4">
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div>
 						<label
 							for="new-user-industry"
 							class="mb-2 block text-[10px] font-bold tracking-widest text-neutral-500 uppercase"
 							>Industry</label
 						>
-						<input
+						<IndustrySelect
 							id="new-user-industry"
-							type="text"
 							bind:value={newUser.industry}
-							placeholder="e.g. Tech"
-							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-white/20 focus:outline-none"
+							placeholder="Search GICS sectors"
 						/>
 					</div>
 					<div>
@@ -979,7 +949,7 @@
 							type="text"
 							bind:value={newUser.batch}
 							placeholder="e.g. 2024"
-							class="w-full rounded-xl border border-white/5 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-700 transition-all focus:border-white/20 focus:outline-none"
+							class="w-full rounded-xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm font-medium text-white placeholder-neutral-700 shadow-inner shadow-black/40 transition-all focus:border-red-500/60 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
 						/>
 					</div>
 				</div>

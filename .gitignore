@@ -44,3 +44,7 @@ docker/
 awscliv2.zip
 docker.tgz
 .claude/
+
+# Local profile photo storage (development fallback when S3 is unconfigured)
+server/uploads/
+uploads/

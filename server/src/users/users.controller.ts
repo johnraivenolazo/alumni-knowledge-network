@@ -54,15 +54,35 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Post('profile-pic-upload')
-  getUploadUrl(
+  async uploadProfilePic(
     @Req() req: AuthenticatedRequest,
-    @Body() body: { fileName: string; contentType?: string },
+    @Body()
+    body: { fileName: string; contentType?: string; dataBase64: string },
   ) {
-    return this.usersService.generatePresignedUrl(
+    const result = await this.usersService.uploadProfilePicture(
       req.user.id,
       body.fileName,
       body.contentType,
+      body.dataBase64,
     );
+
+    // Local-storage fallback returns a relative `/uploads/...` URL because
+    // the service can't see the inbound request. Resolve it to an absolute
+    // URL here so the value persisted in `profilePic` works across pages
+    // without each renderer needing to know about the API origin.
+    if (result.publicUrl.startsWith('/')) {
+      const protocol =
+        (req.headers['x-forwarded-proto'] as string | undefined) ||
+        (req.protocol as string);
+      const host = req.get('host');
+      if (host) {
+        return {
+          ...result,
+          publicUrl: `${protocol}://${host}${result.publicUrl}`,
+        };
+      }
+    }
+    return result;
   }
 
   @Get()
