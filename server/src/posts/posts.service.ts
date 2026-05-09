@@ -1,14 +1,27 @@
 import {
+  BadRequestException,
   Injectable,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role, ReactionType } from '@akn/database';
+import {
+  PROFANITY_REJECTION_MESSAGE,
+  checkProfanity,
+} from '../common/profanity.util';
 
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) {}
+
+  private assertCleanContent(...parts: (string | undefined | null)[]) {
+    const combined = parts.filter(Boolean).join('\n');
+    const result = checkProfanity(combined);
+    if (!result.clean) {
+      throw new BadRequestException(PROFANITY_REJECTION_MESSAGE);
+    }
+  }
 
   async create(
     authorId: string,
@@ -16,6 +29,7 @@ export class PostsService {
     content: string,
     category: string = 'General',
   ) {
+    this.assertCleanContent(title, content);
     return this.prisma.post.create({
       data: {
         title,
@@ -79,6 +93,7 @@ export class PostsService {
   }
 
   async addComment(postId: string, authorId: string, content: string) {
+    this.assertCleanContent(content);
     return this.prisma.comment.create({
       data: {
         content,

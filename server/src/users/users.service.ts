@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -7,6 +8,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Role, User, UserStatus, UserType } from '@akn/database';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const ALLOWED_IMAGE_MIME: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+};
 
 @Injectable()
 export class UsersService {
@@ -178,18 +185,46 @@ export class UsersService {
     });
   }
 
-  async generatePresignedUrl(userId: string, fileName: string) {
+  async generatePresignedUrl(
+    userId: string,
+    fileName: string,
+    contentType?: string,
+  ) {
     const bucketName = process.env.AWS_S3_BUCKET;
-    const key = `profiles/${userId}/${Date.now()}-${fileName}`;
+    if (!bucketName) {
+      throw new BadRequestException('Profile photo storage is not configured.');
+    }
+
+    // Strict allowlist by both extension and MIME. We require BOTH to match
+    // because either signal alone is forgeable: a renamed .exe still reports
+    // its real MIME, and a hand-crafted upload can lie about MIME while
+    // claiming a benign extension.
+    const ext = (fileName.split('.').pop() || '').toLowerCase();
+    const expectedMime = ALLOWED_IMAGE_MIME[ext];
+    if (!expectedMime) {
+      throw new BadRequestException(
+        'Only PNG or JPG profile photos are allowed.',
+      );
+    }
+    if (contentType && contentType !== expectedMime) {
+      throw new BadRequestException(
+        'Profile photo content type does not match the file extension.',
+      );
+    }
+
+    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const key = `profiles/${userId}/${Date.now()}-${safeName}`;
 
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: key,
-      ContentType: 'image/jpeg',
+      ContentType: expectedMime,
     });
 
     const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
-    return { url, key };
+    const region = process.env.AWS_REGION || 'us-east-1';
+    const publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
+    return { url, key, publicUrl };
   }
 
   async findAll(filters?: {

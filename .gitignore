@@ -43,3 +43,4 @@ aws/
 docker/
 awscliv2.zip
 docker.tgz
+.claude/

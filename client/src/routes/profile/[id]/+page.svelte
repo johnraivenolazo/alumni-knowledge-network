@@ -13,6 +13,16 @@
 	let editData = $state({ bio: '', industry: '', batch: '', userType: 'STUDENT' as UserType });
 	let isMyProfile = $derived(page.params.id === 'me' || profileUser?.id === $user?.id);
 	let canEditIdentity = $derived($user?.role === 'SUPERADMIN');
+	// Superadmins are platform operators, not network members. Their profile only
+	// surfaces their bio — userType, industry, and batch are intentionally hidden
+	// because those fields don't apply to staff identity.
+	let isSuperadminProfile = $derived(profileUser?.role === 'SUPERADMIN');
+	let avatarFileInput = $state<HTMLInputElement | null>(null);
+	let avatarUploading = $state(false);
+	let avatarError = $state('');
+
+	const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg'];
+	const ALLOWED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg'];
 
 	async function loadProfile() {
 		try {
@@ -44,6 +54,56 @@
 			isEditing = false;
 		} catch (e) {
 			console.error(e);
+		}
+	}
+
+	function pickAvatar() {
+		avatarError = '';
+		avatarFileInput?.click();
+	}
+
+	async function handleAvatarChange(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		// Always reset the input so picking the same file again still triggers change.
+		input.value = '';
+		if (!file) return;
+
+		const ext = (file.name.split('.').pop() || '').toLowerCase();
+		// Strict allowlist: reject anything that isn't PNG/JPG by BOTH extension and MIME.
+		// We check both because a renamed .exe still reports its real MIME, and a
+		// hand-crafted MIME header can lie about a benign-looking extension.
+		if (!ALLOWED_IMAGE_EXTENSIONS.includes(ext) || !ALLOWED_IMAGE_TYPES.includes(file.type)) {
+			avatarError = 'Only PNG or JPG images are allowed.';
+			return;
+		}
+
+		avatarUploading = true;
+		avatarError = '';
+		try {
+			const { url, publicUrl } = await api.post('/users/profile-pic-upload', {
+				fileName: file.name,
+				contentType: file.type
+			});
+
+			const putRes = await fetch(url, {
+				method: 'PUT',
+				headers: { 'Content-Type': file.type },
+				body: file
+			});
+			if (!putRes.ok) {
+				throw new Error(`Upload failed (${putRes.status})`);
+			}
+
+			const updated = await api.patch('/users/me', { profilePic: publicUrl });
+			profileUser = { ...profileUser, ...updated };
+			if (isMyProfile) {
+				user.update((u) => (u ? { ...u, profilePic: publicUrl } : u));
+			}
+		} catch (e) {
+			avatarError = (e as Error).message || 'Failed to upload photo.';
+		} finally {
+			avatarUploading = false;
 		}
 	}
 
@@ -87,6 +147,61 @@
 							<div class="flex h-full w-full items-center justify-center text-4xl">👤</div>
 						{/if}
 					</div>
+					{#if isMyProfile}
+						<input
+							bind:this={avatarFileInput}
+							type="file"
+							accept="image/png,image/jpeg"
+							onchange={handleAvatarChange}
+							class="hidden"
+						/>
+						<button
+							type="button"
+							onclick={pickAvatar}
+							disabled={avatarUploading}
+							class="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-neutral-900 text-white shadow-lg transition-all hover:bg-neutral-800 active:scale-95 disabled:opacity-60"
+							title="Change profile photo (PNG or JPG)"
+							aria-label="Change profile photo"
+						>
+							{#if avatarUploading}
+								<svg
+									class="h-4 w-4 animate-spin"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="3"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4zm2 5.3A8 8 0 014 12H0c0 3 1.1 5.8 3 7.9l3-2.6z"
+									></path>
+								</svg>
+							{:else}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+									/><circle cx="12" cy="13" r="4" />
+								</svg>
+							{/if}
+						</button>
+					{/if}
 					<!-- Verification Badge -->
 					{#if profileUser.status === 'APPROVED'}
 						<div
@@ -114,13 +229,15 @@
 								{profileUser.name || 'Anonymous User'}
 							</h1>
 							<div class="flex flex-wrap items-center gap-2">
-								<span
-									class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase {userTypeBadgeClass(
-										profileUser
-									)}"
-								>
-									{displayUserType(profileUser) || 'STUDENT'}
-								</span>
+								{#if !isSuperadminProfile}
+									<span
+										class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase {userTypeBadgeClass(
+											profileUser
+										)}"
+									>
+										{displayUserType(profileUser) || 'STUDENT'}
+									</span>
+								{/if}
 								<span
 									class="rounded-full border px-3 py-1 text-[10px] font-black tracking-[0.2em] uppercase
 									{profileUser.role === 'SUPERADMIN'
@@ -133,6 +250,11 @@
 								</span>
 							</div>
 							<p class="text-sm font-medium text-neutral-500">{profileUser.email}</p>
+							{#if avatarError && isMyProfile}
+								<p class="text-[11px] font-bold tracking-widest text-red-400 uppercase">
+									{avatarError}
+								</p>
+							{/if}
 						</div>
 
 						{#if isMyProfile && !isEditing}
@@ -147,8 +269,10 @@
 
 					{#if isEditing}
 						<div in:fly={{ y: 20, duration: 400 }} class="space-y-6 pt-4">
-							{#if canEditIdentity}
-								<!-- User Type Toggle (Superadmin only) -->
+							{#if isSuperadminProfile}
+								<!-- Superadmins only manage their bio; identity fields are not part of their profile. -->
+							{:else if canEditIdentity}
+								<!-- User Type Toggle (Superadmin editing another member) -->
 								<div class="space-y-2">
 									<label class="text-[10px] font-black tracking-widest text-neutral-500 uppercase"
 										>Network Member Type</label
@@ -260,28 +384,30 @@
 						</div>
 					{:else}
 						<div in:fade={{ duration: 200 }} class="space-y-8">
-							<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-								<div class="rounded-2xl border border-white/5 bg-white/5 p-6">
-									<h3
-										class="mb-2 text-[10px] font-black tracking-widest text-neutral-600 uppercase"
-									>
-										Expertise
-									</h3>
-									<p class="text-xl font-bold text-neutral-200">
-										{profileUser.industry || 'Not specified'}
-									</p>
+							{#if !isSuperadminProfile}
+								<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+									<div class="rounded-2xl border border-white/5 bg-white/5 p-6">
+										<h3
+											class="mb-2 text-[10px] font-black tracking-widest text-neutral-600 uppercase"
+										>
+											Expertise
+										</h3>
+										<p class="text-xl font-bold text-neutral-200">
+											{profileUser.industry || 'Not specified'}
+										</p>
+									</div>
+									<div class="rounded-2xl border border-white/5 bg-white/5 p-6">
+										<h3
+											class="mb-2 text-[10px] font-black tracking-widest text-neutral-600 uppercase"
+										>
+											Timeline
+										</h3>
+										<p class="text-xl font-bold text-neutral-200">
+											{profileUser.batch ? `Batch ${profileUser.batch}` : 'Not specified'}
+										</p>
+									</div>
 								</div>
-								<div class="rounded-2xl border border-white/5 bg-white/5 p-6">
-									<h3
-										class="mb-2 text-[10px] font-black tracking-widest text-neutral-600 uppercase"
-									>
-										Timeline
-									</h3>
-									<p class="text-xl font-bold text-neutral-200">
-										{profileUser.batch ? `Batch ${profileUser.batch}` : 'Not specified'}
-									</p>
-								</div>
-							</div>
+							{/if}
 							<div class="space-y-3">
 								<h3 class="text-[10px] font-black tracking-widest text-neutral-600 uppercase">
 									About

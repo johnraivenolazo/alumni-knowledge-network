@@ -56,9 +56,13 @@ export class UsersController {
   @Post('profile-pic-upload')
   getUploadUrl(
     @Req() req: AuthenticatedRequest,
-    @Body() body: { fileName: string },
+    @Body() body: { fileName: string; contentType?: string },
   ) {
-    return this.usersService.generatePresignedUrl(req.user.id, body.fileName);
+    return this.usersService.generatePresignedUrl(
+      req.user.id,
+      body.fileName,
+      body.contentType,
+    );
   }
 
   @Get()

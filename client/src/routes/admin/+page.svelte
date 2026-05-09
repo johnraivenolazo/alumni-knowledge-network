@@ -134,7 +134,7 @@
 				<button
 					onclick={() => (activeTab = tab as any)}
 					class="relative rounded-lg px-6 py-2 text-sm font-medium transition-all {activeTab === tab
-						? 'bg-indigo-500 text-white shadow-lg'
+						? 'bg-white/10 text-white'
 						: 'text-neutral-400 hover:text-white'}"
 				>
 					{tab.charAt(0).toUpperCase() + tab.slice(1)}

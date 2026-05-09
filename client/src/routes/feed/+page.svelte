@@ -311,15 +311,24 @@
 											>
 										{/if}
 									</div>
-									{#if displayUserType(post.author)}
-										<span
-											class="mt-1.5 inline-block rounded-full border px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] uppercase {userTypeBadgeClass(
-												post.author
-											)}"
-										>
-											{displayUserType(post.author)}
-										</span>
-									{/if}
+									<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+										{#if displayUserType(post.author)}
+											<span
+												class="rounded-full border px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] uppercase {userTypeBadgeClass(
+													post.author
+												)}"
+											>
+												({displayUserType(post.author)})
+											</span>
+										{/if}
+										{#if post.category}
+											<span
+												class="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[9px] font-black tracking-[0.18em] text-neutral-300 uppercase"
+											>
+												({post.category})
+											</span>
+										{/if}
+									</div>
 									<p class="mt-1 text-sm text-neutral-500">
 										{post.author?.industry || 'General'} •
 										<span class="text-[10px] font-bold tracking-widest uppercase"
