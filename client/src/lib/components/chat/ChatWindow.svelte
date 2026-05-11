@@ -1,12 +1,18 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	// Lifecycle hooks: run code when component mounts/unmounts
+	import { onMount, onDestroy } from 'svelte'; 
+	// Import socket.io client for real-time communication
 	import { io, Socket } from 'socket.io-client';
+	// Transition effect for animating messages
 	import { fly } from 'svelte/transition';
+	// Auth utilities: current user and token retrieval
 	import { user, getToken } from '$lib/authService';
+	// Type definition for chat messages
 	import { type Message } from '$lib/types';
 
+	  // Props passed into the component
 	let { requestId, receiverId, partnerName, initialMessages = [], onRemove } = $props();
-
+	// Socket instance
 	let socket: Socket;
 	let messages = $state<Message[]>([]);
 	let newMessage = $state('');
