@@ -97,10 +97,10 @@ This project is configured for deployment on AWS Amplify. For detailed instructi
 
 The development and design of this project were made possible by:
 
-- **John Raiven Olazo**
-- **Herky Dee Abarquez**
-- **Boris Gamaliel Duque**
-- **Prince Cyrus Andres Ang**
+- **John Raiven A. Olazo** – Lead Developer / System Architect
+- **Herky Dee Abarquez** – UI/UX Designer / Frontend Developer
+- **Boris Gamaliel Duque** – Full Stack Developer / DevOps
+- **Prince Cyrus Andres Ang** – QA & Documentation Lead
 
 ## License
 
